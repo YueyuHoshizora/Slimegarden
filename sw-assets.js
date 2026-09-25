@@ -36,7 +36,7 @@ self.SW_ASSETS = [
   "/src/main.js?v=0c6da644d5",
   "/src/pwa.js?v=d7077bb968",
   "/src/render/tank.js?v=6e8315e8bd",
-  "/src/ui/view.js?v=a309dd656c",
-  "/styles/main.css?v=d482a861aa"
+  "/src/ui/view.js?v=3a2e1bf570",
+  "/styles/main.css?v=356d0d3d84"
 ];
-self.SW_VERSION = "627eb073761c4723";
+self.SW_VERSION = "8849bf640a656b49";

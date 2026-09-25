@@ -143,7 +143,13 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
 .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 43px; padding: 4px 8px; border-radius: 13px; background: #f7f8f1; font-size: .78rem; }
 .setting-row select { width: min(60%, 180px); }
 .setting-row > span { flex: 1; }
-.setting-row .volume-slider { width: min(42%, 150px); height: 44px; margin: 0; accent-color: #81b598; }
+/* 自訂軌道：已拉到的部分深綠、其餘淺綠，--fill 由 view.js 同步 */
+.setting-row .volume-slider { width: min(42%, 150px); height: 44px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.volume-slider::-webkit-slider-runnable-track { height: 8px; border-radius: 99px; background: linear-gradient(to right, #81b598 var(--fill, 100%), #dcefe0 var(--fill, 100%)); }
+.volume-slider::-moz-range-track { height: 8px; border-radius: 99px; background: #dcefe0; }
+.volume-slider::-moz-range-progress { height: 8px; border-radius: 99px; background: #81b598; }
+.volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -7px; border: 3px solid #fffdf7; border-radius: 50%; background: #81b598; box-shadow: 0 1px 4px rgba(77, 101, 88, .3); }
+.volume-slider::-moz-range-thumb { width: 16px; height: 16px; border: 3px solid #fffdf7; border-radius: 50%; background: #81b598; box-shadow: 0 1px 4px rgba(77, 101, 88, .3); }
 .settings-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .settings-actions button, .settings-actions .file-button { display: grid; place-items: center; min-height: 44px; font-size: .73rem; text-align: center; }
 .save-code { min-height: 54px; max-height: 72px; resize: none; font-size: .7rem; }

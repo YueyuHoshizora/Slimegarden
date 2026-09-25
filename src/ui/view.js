@@ -147,8 +147,8 @@ export function createUI(root, handlers) {
     const effectsMuted = Boolean(state.settings.sfxMuted);
     host.innerHTML = `
       <div class="setting-row"><span>${getLabel('language')}</span><select data-language aria-label="${getLabel('language')}"></select></div>
-      <div class="setting-row"><span>${getLabel('music')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.bgmVolume ?? 1) * 100)}" data-volume="music" aria-label="${getLabel('music')} ${getLabel('volume')}"><button type="button" data-action="toggle-music">${getLabel(musicMuted ? 'off' : 'on')}</button></div>
-      <div class="setting-row"><span>${getLabel('soundEffects')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.sfxVolume ?? 1) * 100)}" data-volume="effects" aria-label="${getLabel('soundEffects')} ${getLabel('volume')}"><button type="button" data-action="toggle-effects">${getLabel(effectsMuted ? 'off' : 'on')}</button></div>
+      <div class="setting-row"><span>${getLabel('music')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.bgmVolume ?? 1) * 100)}" style="--fill:${Math.round((state.settings.bgmVolume ?? 1) * 100)}%" data-volume="music" aria-label="${getLabel('music')} ${getLabel('volume')}"><button type="button" data-action="toggle-music">${getLabel(musicMuted ? 'off' : 'on')}</button></div>
+      <div class="setting-row"><span>${getLabel('soundEffects')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.sfxVolume ?? 1) * 100)}" style="--fill:${Math.round((state.settings.sfxVolume ?? 1) * 100)}%" data-volume="effects" aria-label="${getLabel('soundEffects')} ${getLabel('volume')}"><button type="button" data-action="toggle-effects">${getLabel(effectsMuted ? 'off' : 'on')}</button></div>
       <div class="settings-actions">
         <button type="button" data-action="export-json">${getLabel('exportJson')}</button>
         <button type="button" data-action="export-base64">${getLabel('exportBase64')}</button>
@@ -531,7 +531,10 @@ export function createUI(root, handlers) {
   // 拖動滑桿時即時調整音量，放開後才存檔
   root.addEventListener('input', (event) => {
     const target = event.target;
-    if (target.matches('[data-volume]')) handlers.onAction?.('set-volume', { channel: target.dataset.volume, volume: Number(target.value) / 100, commit: false });
+    if (target.matches('[data-volume]')) {
+      target.style.setProperty('--fill', `${target.value}%`);
+      handlers.onAction?.('set-volume', { channel: target.dataset.volume, volume: Number(target.value) / 100, commit: false });
+    }
   });
 
   root.addEventListener('change', async (event) => {
