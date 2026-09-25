@@ -105,7 +105,7 @@ export async function exportCardPng({ title = t('codex'), entries = [], footer =
     context.shadowBlur = 0;
     context.drawImage(images[index], x + (CARD.cellWidth - CARD.imageSize) / 2, y + 12, CARD.imageSize, CARD.imageSize);
     context.textAlign = 'center';
-    drawText(context, safeEntries[index]?.name, x + 18, y + 181, CARD.cellWidth - 36, 25, 1, '#536c5d', '700 19px system-ui, sans-serif');
+    drawText(context, safeEntries[index]?.name, x + CARD.cellWidth / 2, y + 181, CARD.cellWidth - 36, 25, 1, '#536c5d', '700 19px system-ui, sans-serif');
     context.textAlign = 'left';
     drawText(context, safeEntries[index]?.note, x + 25, y + 211, CARD.cellWidth - 50, 17, 2, '#809183', '14px system-ui, sans-serif');
   }
