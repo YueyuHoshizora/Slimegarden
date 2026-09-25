@@ -32,11 +32,11 @@ self.SW_ASSETS = [
   "/src/data/texts/observations.js?v=0c6fb90ada",
   "/src/data/texts/ui.js?v=981aac88e1",
   "/src/data/upgrades.js?v=b657f17597",
-  "/src/i18n/index.js?v=a306ff9a26",
+  "/src/i18n/index.js?v=ff2d85621d",
   "/src/main.js?v=0c6da644d5",
   "/src/pwa.js?v=d7077bb968",
   "/src/render/tank.js?v=6e8315e8bd",
   "/src/ui/view.js?v=a309dd656c",
   "/styles/main.css?v=d482a861aa"
 ];
-self.SW_VERSION = "659d9d9549658d2e";
+self.SW_VERSION = "627eb073761c4723";

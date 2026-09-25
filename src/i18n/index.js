@@ -29,17 +29,9 @@ function savedLanguage() {
   }
 }
 
-function browserLanguage() {
-  if (typeof navigator === 'undefined') return null;
-  const locale = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
-  if (locale.startsWith('zh')) return 'zh-Hant';
-  if (locale.startsWith('ja')) return 'ja';
-  if (locale.startsWith('en')) return 'en';
-  return null;
-}
-
+// 首次進入一律英語；網址參數或已存的選擇優先
 function detectLanguage() {
-  return queryLanguage() || savedLanguage() || browserLanguage() || DEFAULT_LANGUAGE;
+  return queryLanguage() || savedLanguage() || DEFAULT_LANGUAGE;
 }
 
 function applyDocumentLanguage() {
