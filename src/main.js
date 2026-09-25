@@ -495,6 +495,11 @@ function resumeOffline() {
   render();
 }
 
+// 鎖定右鍵／長按選單；文字輸入欄保留，才能貼上存檔碼
+document.addEventListener('contextmenu', (event) => {
+  if (!event.target.closest?.('textarea, input, select')) event.preventDefault();
+});
+
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) saveNow();
   else resumeOffline();
