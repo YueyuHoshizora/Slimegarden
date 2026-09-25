@@ -44,8 +44,15 @@ state.settings.language = getLang();
 state.settings.bgmMuted = Boolean(state.settings.bgmMuted);
 state.settings.sfxMuted = Boolean(state.settings.sfxMuted);
 if (hadSave && state.settings.soundPromptSeen === undefined) state.settings.soundPromptSeen = true;
+// 音量存為 0～1；舊存檔沒有這個欄位時維持原本的全音量
+for (const key of ['bgmVolume', 'sfxVolume']) {
+  const value = Number(state.settings[key]);
+  state.settings[key] = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 1;
+}
 sfx.setMuted(state.settings.sfxMuted);
 bgm.setMuted(state.settings.bgmMuted);
+sfx.setVolume(state.settings.sfxVolume);
+bgm.setVolume(state.settings.bgmVolume);
 
 let phase = getPhase(now);
 let slimeSignature = '';
@@ -282,6 +289,16 @@ async function handleAction(action, value) {
     state.settings.sfxMuted = !state.settings.sfxMuted;
     sfx.setMuted(state.settings.sfxMuted);
     updateAfterAction();
+    return;
+  }
+  if (action === 'set-volume') {
+    const { channel, volume, commit } = value;
+    state.settings[channel === 'music' ? 'bgmVolume' : 'sfxVolume'] = volume;
+    (channel === 'music' ? bgm : sfx).setVolume(volume);
+    if (commit) {
+      if (channel === 'effects') playIfAvailable('button');
+      saveNow();
+    }
     return;
   }
   if (action === 'enable-sound') { await enableAudio(); render(); return; }

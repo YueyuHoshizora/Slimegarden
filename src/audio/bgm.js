@@ -7,6 +7,8 @@ const CHANNEL_VOLUME = { pulse1: 0.12, pulse2: 0.075, triangle: 0.13, noise: 0.0
 let context;
 let master;
 let muted = false;
+// 玩家音量（0～1），乘在 master 基準增益上
+let volume = 1;
 let unlocked = false;
 let noiseBuffer;
 let nextDay = 0;
@@ -19,7 +21,7 @@ function audio() {
   if (!context) {
     context = new AudioContextClass();
     master = context.createGain();
-    master.gain.value = muted ? 0 : 0.55;
+    master.gain.value = masterGain();
     master.connect(context.destination);
     noiseBuffer = context.createBuffer(1, context.sampleRate, context.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -151,12 +153,25 @@ function stop() {
   }, 1200);
 }
 
-function setMuted(value) {
-  muted = Boolean(value);
+function masterGain() {
+  return muted ? 0 : 0.55 * volume;
+}
+
+function applyGain() {
   if (master && context) {
     master.gain.cancelScheduledValues(context.currentTime);
-    master.gain.setTargetAtTime(muted ? 0 : 0.55, context.currentTime, 0.025);
+    master.gain.setTargetAtTime(masterGain(), context.currentTime, 0.025);
   }
+}
+
+function setMuted(value) {
+  muted = Boolean(value);
+  applyGain();
+}
+
+function setVolume(value) {
+  volume = Math.min(1, Math.max(0, Number(value) || 0));
+  applyGain();
 }
 
 export const bgm = {
@@ -170,4 +185,5 @@ export const bgm = {
   play,
   stop,
   setMuted,
+  setVolume,
 };

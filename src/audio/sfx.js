@@ -3,6 +3,8 @@ const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioConte
 let context;
 let master;
 let muted = false;
+// 玩家音量（0～1），乘在 master 基準增益上
+let volume = 1;
 let noiseBuffer;
 
 function audio() {
@@ -10,7 +12,7 @@ function audio() {
   if (!context) {
     context = new AudioContextClass();
     master = context.createGain();
-    master.gain.value = muted ? 0 : 0.72;
+    master.gain.value = masterGain();
     master.connect(context.destination);
     noiseBuffer = context.createBuffer(1, context.sampleRate, context.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -96,12 +98,25 @@ function play(name) {
   }
 }
 
-function setMuted(value) {
-  muted = Boolean(value);
+function masterGain() {
+  return muted ? 0 : 0.72 * volume;
+}
+
+function applyGain() {
   if (master && context) {
     master.gain.cancelScheduledValues(context.currentTime);
-    master.gain.setTargetAtTime(muted ? 0 : 0.72, context.currentTime, 0.025);
+    master.gain.setTargetAtTime(masterGain(), context.currentTime, 0.025);
   }
+}
+
+function setMuted(value) {
+  muted = Boolean(value);
+  applyGain();
+}
+
+function setVolume(value) {
+  volume = Math.min(1, Math.max(0, Number(value) || 0));
+  applyGain();
 }
 
 export const sfx = {
@@ -114,4 +129,5 @@ export const sfx = {
   },
   play,
   setMuted,
+  setVolume,
 };

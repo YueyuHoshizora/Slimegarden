@@ -142,6 +142,8 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
 .inline-settings { display: flex; flex-direction: column; gap: 7px; flex: 1; min-height: 0; overflow: hidden; }
 .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 43px; padding: 4px 8px; border-radius: 13px; background: #f7f8f1; font-size: .78rem; }
 .setting-row select { width: min(60%, 180px); }
+.setting-row > span { flex: 1; }
+.setting-row .volume-slider { width: min(42%, 150px); height: 44px; margin: 0; accent-color: #81b598; }
 .settings-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .settings-actions button, .settings-actions .file-button { display: grid; place-items: center; min-height: 44px; font-size: .73rem; text-align: center; }
 .save-code { min-height: 54px; max-height: 72px; resize: none; font-size: .7rem; }
