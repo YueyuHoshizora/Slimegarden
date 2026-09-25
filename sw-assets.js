@@ -44,7 +44,7 @@ self.SW_ASSETS = [
   "/src/core/offline.js?v=6190ae111f",
   "/src/core/save.js?v=292b67d3db",
   "/src/core/time.js?v=f06715fe19",
-  "/src/data/config.js?v=9d586d7221",
+  "/src/data/config.js?v=f875d87cc6",
   "/src/data/decorations.js?v=fe06f5020c",
   "/src/data/mutations.js?v=8162d9acf6",
   "/src/data/recipes.js?v=344664fe65",
@@ -59,6 +59,6 @@ self.SW_ASSETS = [
   "/src/pwa.js?v=d7077bb968",
   "/src/render/tank.js?v=85e058b8f3",
   "/src/ui/view.js?v=8e588aaba5",
-  "/styles/main.css?v=3bf09a6ef0"
+  "/styles/main.css?v=16bc9ff3ed"
 ];
-self.SW_VERSION = "fa00386884afa2ba";
+self.SW_VERSION = "98f226b7e537656f";
