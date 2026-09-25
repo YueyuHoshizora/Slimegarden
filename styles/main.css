@@ -296,6 +296,8 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
   .brand-title { max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* 窄手機上標題文字會把頂列撐出畫面，只留圓形標誌 */
   @media (max-width: 420px) { .brand-title { display: none; } }
+  /* 320 寬時四個資源膠囊放不下，會蓋住標誌，直接收起標誌 */
+  @media (max-width: 360px) { .brand { display: none; } }
   .resource-row { justify-content: flex-end; gap: 3px; }
   .resource-chip { display: flex; flex-direction: column; gap: 0; min-width: 37px; min-height: 39px; padding: 3px 4px; border-radius: 11px; font-size: .59rem; line-height: 1.05; }
   .resource-chip .resource-label { display: none; }
@@ -305,16 +307,15 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
   .top-controls select { width: 63px; min-height: 44px; padding: 4px 18px 4px 6px; background-position: right 6px center; font-size: .69rem; }
   .top-controls .phase-chip { display: none; }
   .top-controls .icon-button { width: 44px; min-height: 44px; }
-  .layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 38%) minmax(0, 1fr); grid-template-areas: "garden" "side"; gap: 6px; }
-  /* 手機設定頁按鈕與存檔欄較多，暫時收起花園讓設定用滿整個版面 */
-  .layout[data-panel="settings"] { grid-template-rows: minmax(0, 1fr); grid-template-areas: "side"; }
-  .layout[data-panel="settings"] .garden-stage { display: none; }
-  .garden-stage { grid-area: garden; grid-template-rows: auto minmax(0, 1fr) auto; gap: 4px; padding: 6px; border-radius: 18px; }
-  .stage-head { min-height: 31px; }
-  .stage-title { font-size: .85rem; }
-  .stage-switch { display: none; }
-  .tank-frame { border-radius: 15px; }
-  .tank-caption { min-height: 26px; font-size: .66rem; }
+  /* 手機版以花園為主：花園頁＝花園＋底部操作列；配方頁保留上半部花園（要在花園裡點選史萊姆）；圖鑑與設定用滿整頁 */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: "garden" "side"; gap: 6px; }
+  .layout[data-panel="recipes"] { grid-template-rows: minmax(0, 42%) minmax(0, 1fr); }
+  .layout[data-panel="codex"], .layout[data-panel="settings"] { grid-template-rows: minmax(0, 1fr); grid-template-areas: "side"; }
+  .layout[data-panel="codex"] .garden-stage, .layout[data-panel="settings"] .garden-stage { display: none; }
+  .garden-stage { grid-area: garden; grid-template-rows: minmax(0, 1fr) auto; gap: 2px; padding: 5px; border-radius: 18px; }
+  .stage-head { display: none; }
+  .tank-frame { border-radius: 14px; }
+  .tank-caption { min-height: 20px; padding-inline: 4px; font-size: .64rem; }
   .side-stack { display: flex; flex-direction: column; min-height: 0; grid-area: side; }
   .side-stack > .panel { display: none; flex: 1; padding: 8px; border-radius: 17px; }
   .side-stack > .panel.active { display: flex; }
@@ -352,16 +353,28 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
   .setting-row select { min-height: 44px; }
   .inline-settings { gap: 5px; }
   .settings-inline-copy { display: none; }
-  .merge-panel .slime-list, .merge-panel > .pager { display: none; }
-  .merge-panel .merge-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .merge-tools button, .merge-tools .toggle { min-width: 0; justify-content: center; padding-inline: 4px; font-size: .64rem; }
+  #recipe-panel { display: none; grid-area: side; padding: 8px; border-radius: 17px; }
+  #recipe-panel.active { display: flex; }
+  /* 花園頁的操作列：第一列召喚、第二列模式切換＋合成、第三列常用功能，高度隨內容 */
+  .side-stack > .merge-panel.active { display: grid; flex: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding: 6px; }
+  .merge-panel .panel-head, .merge-panel .slime-list, .merge-panel > .pager, .merge-panel #merge-selection-count { display: none; }
+  .merge-panel .merge-summon, .merge-panel .merge-tools { grid-column: 1 / -1; }
+  .merge-panel .merge-summon { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 76px) minmax(0, 96px); gap: 5px; }
+  .merge-panel .merge-summon select, .merge-panel .merge-summon button { min-width: 0; min-height: 44px; font-size: .72rem; }
+  .merge-panel .panel-tools, .merge-panel .selected-action { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; min-height: 44px; }
+  .merge-panel .panel-tools button, .merge-panel .selected-action button { min-width: 0; min-height: 44px; padding-inline: 4px; font-size: .68rem; }
+  .merge-panel .merge-tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .merge-tools button, .merge-tools .toggle { min-width: 0; justify-content: center; padding-inline: 3px; font-size: .62rem; line-height: 1.15; white-space: normal; text-align: center; }
+  .merge-tools .toggle { gap: 3px; }
+  .merge-tools .toggle input { width: 18px; height: 18px; min-width: 0; min-height: 0; }
   .dialog-shell { width: calc(100vw - 16px); max-height: min(92dvh, 740px); border-radius: 20px; }
   .dialog-content { max-height: min(92dvh, 740px); padding: 12px; }
   .upgrade-grid, .decoration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
   .upgrade-card, .decoration-card { padding: 6px; font-size: .69rem; }
   .upgrade-card p, .decoration-card p { font-size: .62rem; }
   .upgrade-card button, .decoration-card button { min-height: 44px; font-size: .66rem; }
-  .toast-stack { right: 8px; bottom: 64px; }
+  /* 手機上操作列在下方，提示改從上方花園區出現，不蓋住按鈕 */
+  .toast-stack { top: 66px; right: 8px; bottom: auto; left: 8px; align-items: center; }
   .toast { font-size: .73rem; }
 }
 

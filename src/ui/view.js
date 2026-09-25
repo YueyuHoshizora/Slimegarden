@@ -28,7 +28,8 @@ const localName = (value) => escapeHtml(name(value));
 
 export function createUI(root, handlers) {
   let state = null;
-  let activePanel = 'recipes';
+  // 手機預設停在花園頁（花園＋召喚／合成操作列）；桌面維持配方書
+  let activePanel = window.matchMedia('(max-width: 599px)').matches ? 'merge' : 'recipes';
   let codexTab = 'species';
   let mutationDimension = 'hue';
   let recipePage = 0;
@@ -86,7 +87,7 @@ export function createUI(root, handlers) {
           <div class="panel-head"><h2 class="panel-title" data-ui="mergeNow"></h2><span class="panel-subtitle" data-ui="mergeHint"></span></div>
           <div class="merge-summon"></div>
           <div class="panel-tools"><button type="button" data-action="set-mode" data-mode="merge"></button><button type="button" data-action="set-mode" data-mode="recipe"></button><span class="subtle" id="merge-selection-count"></span></div>
-          <div class="selected-action"><button type="button" class="primary" data-action="merge-selected" id="merge-selected-button"></button><button type="button" data-action="clear-selection" data-mode="merge"></button></div>
+          <div class="selected-action"><button type="button" class="primary" data-action="merge-selected" id="merge-selected-button"></button><button type="button" data-action="clear-selection" data-mode="merge" data-ui="clearSelection"></button></div>
           <div class="slime-list" id="slime-list"></div>
           <div class="pager"><button type="button" data-action="slime-page" data-step="-1" aria-label="Previous">‹</button><span class="subtle" id="slime-page-label"></span><button type="button" data-action="slime-page" data-step="1" aria-label="Next">›</button></div>
           <div class="merge-tools"><label class="toggle"><input type="checkbox" data-setting="autoMerge"><span data-ui="autoMerge"></span></label><button type="button" data-action="open-decorations" data-ui="decorations"></button><button type="button" data-action="open-offline" data-ui="offlineEntry"></button><button type="button" data-action="open-prestige" data-ui="prestige"></button></div>
@@ -99,7 +100,7 @@ export function createUI(root, handlers) {
       <div class="action-group"><span class="selected-inline" id="selected-inline"></span><button type="button" class="primary" data-action="merge-selected" id="merge-footer-button"></button><button type="button" data-action="clear-selection" data-mode="merge" data-ui="clearSelection"></button></div>
       <div class="action-group"><label class="toggle"><input type="checkbox" data-setting="autoMerge"><span class="auto-label" data-ui="autoMerge"></span></label><button type="button" class="action-secondary" data-action="open-decorations" data-ui="decorations"></button><button type="button" data-action="open-offline" data-ui="offlineEntry"></button><button type="button" data-action="open-prestige" data-ui="prestige"></button></div>
     </footer>
-    <nav class="mobile-tabs" aria-label="Garden pages"><button type="button" data-action="switch-panel" data-panel="recipes"></button><button type="button" data-action="switch-panel" data-panel="codex"></button><button type="button" data-action="switch-panel" data-panel="merge"></button><button type="button" data-action="switch-panel" data-panel="settings"></button></nav>
+    <nav class="mobile-tabs" aria-label="Garden pages"><button type="button" data-action="switch-panel" data-panel="merge"></button><button type="button" data-action="switch-panel" data-panel="recipes"></button><button type="button" data-action="switch-panel" data-panel="codex"></button><button type="button" data-action="switch-panel" data-panel="settings"></button></nav>
     <dialog class="dialog-shell" id="feature-dialog"><div class="dialog-content" id="dialog-content"></div></dialog>
     <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
     <section class="title-screen" id="title-screen" aria-labelledby="title-heading">
@@ -135,9 +136,11 @@ export function createUI(root, handlers) {
     root.querySelector('#settings-panel').setAttribute('aria-label', t('settings'));
     root.querySelectorAll('.pager button[data-step="-1"]').forEach((button) => button.setAttribute('aria-label', '‹'));
     root.querySelectorAll('.pager button[data-step="1"]').forEach((button) => button.setAttribute('aria-label', '›'));
-    root.querySelectorAll('.stage-switch [data-panel="recipes"], .side-route-nav [data-panel="recipes"], .mobile-tabs [data-panel="recipes"]').forEach((button) => { button.textContent = t('recipes'); });
-    root.querySelectorAll('.stage-switch [data-panel="codex"], .side-route-nav [data-panel="codex"], .mobile-tabs [data-panel="codex"]').forEach((button) => { button.textContent = t('codex'); });
-    root.querySelector('.mobile-tabs [data-panel="merge"]').textContent = t('narrowMerge');
+    root.querySelectorAll('.stage-switch [data-panel="recipes"], .side-route-nav [data-panel="recipes"]').forEach((button) => { button.textContent = t('recipes'); });
+    root.querySelectorAll('.stage-switch [data-panel="codex"], .side-route-nav [data-panel="codex"]').forEach((button) => { button.textContent = t('codex'); });
+    root.querySelector('.mobile-tabs [data-panel="recipes"]').textContent = t('narrowRecipes');
+    root.querySelector('.mobile-tabs [data-panel="codex"]').textContent = t('narrowCodex');
+    root.querySelector('.mobile-tabs [data-panel="merge"]').textContent = t('narrowGarden');
     root.querySelector('.mobile-tabs [data-panel="settings"]').textContent = t('narrowSettings');
     const tabLabels = { species: 'speciesTab', mutations: 'mutationsTab', recipes: 'recipesTab' };
     root.querySelectorAll('[data-action="codex-tab"]').forEach((button) => { button.textContent = t(tabLabels[button.dataset.tab]); button.setAttribute('aria-selected', String(button.dataset.tab === codexTab)); });

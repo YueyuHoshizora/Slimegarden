@@ -109,8 +109,8 @@ function syncTank(force = false) {
     .filter((decoration) => decoration.position)
     .map((decoration) => ({
       id: decoration.id,
-      x: decoration.position.x * CONFIG.tank.canvasWidth,
-      y: decoration.position.y * CONFIG.tank.canvasHeight,
+      x: decoration.position.x,
+      y: decoration.position.y,
       scale: decoration.position.scale,
       layer: decoration.position.layer,
     }));
@@ -465,15 +465,12 @@ async function copyText(text) {
 
 function onTankClick(event) {
   if (!pendingDecorationUid) return;
-  const rect = canvas.getBoundingClientRect();
-  const scale = Math.min(rect.width / CONFIG.tank.canvasWidth, rect.height / CONFIG.tank.canvasHeight);
-  const offsetX = (rect.width - CONFIG.tank.canvasWidth * scale) / 2;
-  const offsetY = (rect.height - CONFIG.tank.canvasHeight * scale) / 2;
   const [minimum, maximum] = CONFIG.tank.coordinateMin <= CONFIG.tank.coordinateMax
     ? [CONFIG.tank.coordinateMin, CONFIG.tank.coordinateMax]
     : CONFIG.decorations.placementBounds;
-  const x = Math.max(minimum, Math.min(maximum, (event.clientX - rect.left - offsetX) / (CONFIG.tank.canvasWidth * scale)));
-  const y = Math.max(minimum, Math.min(maximum, (event.clientY - rect.top - offsetY) / (CONFIG.tank.canvasHeight * scale)));
+  const pos = tank.normalizedPoint(event);
+  const x = Math.max(minimum, Math.min(maximum, pos.x));
+  const y = Math.max(minimum, Math.min(maximum, pos.y));
   const definition = DECORATIONS.find((item) => item.id === state.decorations.find((entry) => entry.uid === pendingDecorationUid)?.id);
   const placement = definition?.placement ?? { layer: 'ground', scale: 1 };
   const result = placeDecoration(state, pendingDecorationUid, { x, y, layer: placement.layer, scale: placement.scale });

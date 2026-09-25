@@ -2,7 +2,7 @@ export const CONFIG = {
   saveVersion: 2,
   pacing: { firstMergeMs: 30000, allBaseSpeciesMs: 3600000, firstMutationMs: 300000, firstRareMutationMs: 1800000, introRecipesMs: 3600000, firstPrestigeMs: [14400000, 21600000] },
   storage: { saveKey: 'slimegarden-save', backupKey: 'slimegarden-backup' },
-  tank: { capacity: 60, decorationCapacity: 80, coordinateMin: 0, coordinateMax: 1, canvasWidth: 960, canvasHeight: 560 },
+  tank: { capacity: 60, decorationCapacity: 80, coordinateMin: 0, coordinateMax: 1, canvasWidth: 960, canvasHeight: 560, minCanvasWidth: 420, compactBelowPx: 600, compactViewHeight: 420 },
   time: {
     secondMs: 1000,
     minuteMs: 60000,

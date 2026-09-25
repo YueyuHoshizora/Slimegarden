@@ -1,8 +1,12 @@
 import { SPECIES } from '../data/species.js';
+import { CONFIG } from '../data/config.js';
 import { slimeColors } from '../art/palette.js';
 
-const W = 960;
-const H = 560;
+// 世界高度固定；寬度隨畫布比例在 minCanvasWidth～canvasWidth 間伸縮，直式手機不再縮成一條細長橫幅
+const MAX_W = CONFIG.tank.canvasWidth;
+const MIN_W = CONFIG.tank.minCanvasWidth;
+const H = CONFIG.tank.canvasHeight;
+let W = MAX_W;
 const TAU = Math.PI * 2;
 const bySpecies = new Map(SPECIES.map(species => [species.id, species]));
 
@@ -40,21 +44,34 @@ export function createTank(canvas, opts = {}) {
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 手機版（視窗寬度小於 compactBelowPx）：以 compactViewHeight 高的可視範圍決定世界寬度；桌面與平板維持完整的 960 寬世界
+    const nextW = compactView() ? Math.min(MAX_W, Math.max(MIN_W, CONFIG.tank.compactViewHeight * width / height)) : MAX_W;
+    // 世界變窄或變寬時，史萊姆依比例移到對應位置
+    if (nextW !== W) for (const slime of slimes.values()) if (slime._tank) slime._tank.x *= nextW / W;
+    W = nextW;
+  }
+
+  function compactView() { return innerWidth < CONFIG.tank.compactBelowPx; }
+
+  // 世界→畫布的縮放與位移。手機版填滿並靠底對齊（裁掉上方部分天空，讓地面上的史萊姆放大）；其他尺寸維持完整顯示
+  function view(w, h) {
+    const compact = compactView();
+    const scale = compact ? Math.max(w / W, h / H) : Math.min(w / W, h / H);
+    const dy = h - H * scale;
+    return { scale, ox: (w - W * scale) / 2, oy: Math.min(dy / 2, dy) };
   }
 
   function point(event) {
     const rect = canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width / W, rect.height / H);
-    const left = (rect.width - W * scale) / 2;
-    const top = (rect.height - H * scale) / 2;
-    return { x: (event.clientX - rect.left - left) / scale, y: (event.clientY - rect.top - top) / scale };
+    const { scale, ox, oy } = view(rect.width, rect.height);
+    return { x: (event.clientX - rect.left - ox) / scale, y: (event.clientY - rect.top - oy) / scale };
   }
 
   function place(slime, now, index) {
     if (!slime._tank) {
       const angle = index * 2.399;
       const radius = 70 + (index % 5) * 40;
-      slime._tank = { x: W * .5 + Math.cos(angle) * radius, y: H * .84 + Math.sin(angle) * radius * .08, vx: 0, vy: 0, seed: Math.random() * TAU, born: now, poke: 0, press: 0, stick: 0 };
+      slime._tank = { x: Math.min(W - 65, Math.max(65, W * .5 + Math.cos(angle) * radius * W / MAX_W)), y: H * .84 + Math.sin(angle) * radius * .08, vx: 0, vy: 0, seed: Math.random() * TAU, born: now, poke: 0, press: 0, stick: 0 };
     }
     return slime._tank;
   }
@@ -89,7 +106,7 @@ export function createTank(canvas, opts = {}) {
 
     if (night > .01) {
       for (let i = 0; i < 36; i++) {
-        const x = ((i * 173 + 37) % 910) + 25;
+        const x = ((i * 173 + 37) % (W - 50)) + 25;
         const y = ((i * 97 + 23) % 240) + 25;
         const alpha = night * (.25 + .55 * Math.abs(Math.sin(now / 900 + i * 1.7)));
         ctx.fillStyle = `rgba(255,248,208,${alpha})`;
@@ -98,9 +115,9 @@ export function createTank(canvas, opts = {}) {
       ctx.save();
       ctx.globalAlpha = night;
       ctx.fillStyle = '#f8edc6';
-      ctx.beginPath(); ctx.arc(808, 80, 31, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(W - 152, 80, 31, 0, TAU); ctx.fill();
       ctx.fillStyle = '#263454';
-      ctx.beginPath(); ctx.arc(822, 69, 28, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(W - 138, 69, 28, 0, TAU); ctx.fill();
       ctx.restore();
     }
 
@@ -135,8 +152,9 @@ export function createTank(canvas, opts = {}) {
   }
 
   function drawDecoration(item, now, night) {
-    const x = item.x ?? W * .5;
-    const y = item.y ?? 420;
+    // 擺飾座標為 0～1 的相對位置，依目前世界寬高換算
+    const x = (item.x ?? .5) * W;
+    const y = (item.y ?? .75) * H;
     const id = String(item.id ?? item.type ?? '');
     ctx.save(); ctx.translate(x, y);
     ctx.fillStyle = 'rgba(53,67,58,.16)';
@@ -265,8 +283,7 @@ export function createTank(canvas, opts = {}) {
       longHandler?.(pointer.id);
       pointer.long = true;
     }
-    const scale = Math.min(width / W, height / H);
-    const ox = (width - W * scale) / 2, oy = (height - H * scale) / 2;
+    const { scale, ox, oy } = view(width, height);
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy);
     ctx.clearRect(0, 0, W, H);
     const night = drawBackground(now, dt);
@@ -342,6 +359,8 @@ export function createTank(canvas, opts = {}) {
   }
   function onVisibility() { hidden = document.hidden; lastTime = 0; }
   function resize() { fit(); }
+  // 把指標事件換成 0～1 的相對座標（放置擺飾用）
+  function normalizedPoint(event) { const pos = point(event); return { x: pos.x / W, y: pos.y / H }; }
   observer = new ResizeObserver(resize);
   observer.observe(canvas);
   canvas.addEventListener('pointerdown', onDown);
@@ -360,6 +379,7 @@ export function createTank(canvas, opts = {}) {
     onSlimeTap(callback) { tapHandler = callback; },
     onSlimeLongPress(callback) { longHandler = callback; },
     onSlimeDrop(callback) { dropHandler = callback; },
+    normalizedPoint,
     highlight(uids) { selected.clear(); for (const uid of uids || []) selected.add(uid); },
     playMerge(uids, resultSlime) { return new Promise(resolve => { merge = { ids: new Set(uids), start: performance.now(), resultSlime, resolve }; setTimeout(() => { if (merge?.resultSlime === resultSlime) { merge = null; resolve(); } }, 820); }); },
     playBirth(slime) { const now = performance.now(); addSlime(slime, now, slimes.size); if (slime._tank) slime._tank.born = now; },
