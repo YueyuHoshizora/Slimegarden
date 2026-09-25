@@ -1,7 +1,7 @@
 import { getLang, t } from '../i18n/index.js';
 
 const EXPORTERS = new Map();
-const CARD = { width: 1200, padding: 56, columns: 3, cellWidth: 362, imageSize: 150, rowHeight: 246 };
+const CARD = { width: 1200, padding: 56, columns: 6, cellWidth: 174, imageSize: 140, rowHeight: 240 };
 
 function roundedRect(context, x, y, width, height, radius) {
   context.beginPath();
@@ -105,9 +105,8 @@ export async function exportCardPng({ title = t('codex'), entries = [], footer =
     context.shadowBlur = 0;
     context.drawImage(images[index], x + (CARD.cellWidth - CARD.imageSize) / 2, y + 12, CARD.imageSize, CARD.imageSize);
     context.textAlign = 'center';
-    drawText(context, safeEntries[index]?.name, x + CARD.cellWidth / 2, y + 181, CARD.cellWidth - 36, 25, 1, '#536c5d', '700 19px system-ui, sans-serif');
-    context.textAlign = 'left';
-    drawText(context, safeEntries[index]?.note, x + 25, y + 211, CARD.cellWidth - 50, 17, 2, '#809183', '14px system-ui, sans-serif');
+    drawText(context, safeEntries[index]?.name, x + CARD.cellWidth / 2, y + 177, CARD.cellWidth - 20, 24, 1, '#536c5d', '700 18px system-ui, sans-serif');
+    drawText(context, safeEntries[index]?.note, x + CARD.cellWidth / 2, y + 203, CARD.cellWidth - 20, 17, 2, '#809183', '600 13px system-ui, sans-serif');
   }
   context.textAlign = 'center';
   context.fillStyle = '#93a596';

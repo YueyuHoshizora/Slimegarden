@@ -34,7 +34,7 @@ self.SW_ASSETS = [
   "/favicon.ico",
   "/index.html",
   "/manifest.webmanifest",
-  "/src/art/card.js?v=771df75d4f",
+  "/src/art/card.js?v=f8ecd47898",
   "/src/art/palette.js?v=8b1f256200",
   "/src/art/slimeSvg.js?v=aee1615648",
   "/src/audio/bgm.js?v=842a503f11",
@@ -61,4 +61,4 @@ self.SW_ASSETS = [
   "/src/ui/view.js?v=8e588aaba5",
   "/styles/main.css?v=16bc9ff3ed"
 ];
-self.SW_VERSION = "98f226b7e537656f";
+self.SW_VERSION = "606c1d4ad708a3c2";
