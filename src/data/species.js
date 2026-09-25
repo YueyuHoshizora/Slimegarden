@@ -1,6 +1,6 @@
 const palette = (base, light, dark, accent) => ({ base, light, dark, accent });
 const define = (id, family, kind, zh, en, ja, colors, motif) => ({
-  id, family, kind, name: { zh, en, ja }, palette: palette(...colors), motif,
+  id, family, kind, name: { 'zh-Hant': zh, en, ja }, palette: palette(...colors), motif,
 });
 
 const entries = [

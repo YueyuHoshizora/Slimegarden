@@ -19,6 +19,10 @@ export function migrateSave(input, { now = Date.now(), rng = Math.random } = {})
     migrated.meta = { ...(parsed.meta ?? {}) };
     if (migrated.meta.prestigeCount === undefined) migrated.meta.prestigeCount = parsed.prestigeCount ?? 0;
   }
+  if (version < 2 && parsed.settings?.language === 'zh') {
+    // v2：語系代碼改用 BCP 47 標籤
+    migrated.settings = { ...parsed.settings, language: 'zh-Hant' };
+  }
   const defaults = createState({ now, rng });
   const result = {
     ...defaults,

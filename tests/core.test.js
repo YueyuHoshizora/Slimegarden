@@ -159,6 +159,10 @@ test('save migration, Base64 preview, import backup, and restore round-trip', ()
   assert.equal(oldSave.saveVersion, CONFIG.saveVersion);
   assert.equal(oldSave.resources.primordialMud, 3);
   assert.equal(oldSave.meta.prestigeCount, 2);
+
+  const v1Save = migrateSave({ saveVersion: 1, settings: { language: 'zh', autoMerge: true } }, { now: noon, rng: steadyRng });
+  assert.equal(v1Save.settings.language, 'zh-Hant');
+  assert.equal(v1Save.settings.autoMerge, true);
 });
 
 test('prestige requires tier ten and allows primal summoning with mud alone', () => {

@@ -1,4 +1,5 @@
 import { slimeColors } from './palette.js';
+import { name, t } from '../i18n/index.js';
 
 let nextSvgId = 0;
 const FAMILY_COLORS = {
@@ -62,7 +63,7 @@ export function slimeSvg(speciesDef, { tier = 1, hue = 0, gloss = 0, core = 0, s
   const halo = colors.isNebula ? `<g fill="none" stroke="#fff5d9"><circle cx="60" cy="61" r="44" stroke-width=".7" opacity=".46"/><circle cx="60" cy="61" r="49" stroke-width=".45" stroke-dasharray="1 4" opacity=".5"/><path d="${starPath(21, 60, 2.3)}" fill="#fff8cf" stroke="none"/><path d="${starPath(97, 41, 2.8)}" fill="#fff8cf" stroke="none"/><circle cx="31" cy="34" r="1" fill="#fff"/><circle cx="90" cy="78" r="1.2" fill="#fff"/></g>` : '';
   const glossOverlay = gloss >= 3 ? `<path d="M34 72 C34 52 45 41 57 40" fill="none" stroke="#fff" stroke-width="1.4" opacity=".6"/>` : '';
   const w = Math.max(1, Number(size) || 128);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w}" viewBox="0 0 120 120" role="img" aria-label="${escapeXml(speciesDef?.name?.zh || speciesDef?.id || '史萊姆')}" preserveAspectRatio="xMidYMid meet">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w}" viewBox="0 0 120 120" role="img" aria-label="${escapeXml(name(speciesDef?.name) || speciesDef?.id || '')}" preserveAspectRatio="xMidYMid meet">
 <defs>
   <radialGradient id="${id}-bg" cx="50%" cy="42%" r="68%"><stop stop-color="${backA}" stop-opacity=".9"/><stop offset="1" stop-color="${backB}" stop-opacity=".08"/></radialGradient>
   <radialGradient id="${id}-body" cx="39%" cy="28%" r="79%"><stop stop-color="${colors.light}"/><stop offset=".45" stop-color="${colors.base}" stop-opacity="${colors.opacity}"/><stop offset="1" stop-color="${colors.dark}" stop-opacity=".96"/></radialGradient>
@@ -99,5 +100,5 @@ ${extraStars}
 export function silhouetteSvg(size = 128) {
   const w = Math.max(1, Number(size) || 128);
   const id = `silhouette-${++nextSvgId}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w}" viewBox="0 0 120 120" aria-label="尚未發現" role="img"><defs><radialGradient id="${id}-g"><stop stop-color="#d9ddd8"/><stop offset="1" stop-color="#aeb9b3"/></radialGradient></defs><ellipse cx="60" cy="101" rx="37" ry="6" fill="#8d9d94" opacity=".16"/><path d="M23 77C24 56 39 36 60 35s36 20 37 42c1 17-16 25-37 25S24 94 23 77Z" fill="url(#${id}-g)" opacity=".56"/><ellipse cx="49" cy="69" rx="3" ry="4" fill="#f8faf7" opacity=".66"/><ellipse cx="71" cy="69" rx="3" ry="4" fill="#f8faf7" opacity=".66"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w}" viewBox="0 0 120 120" aria-label="${escapeXml(t('unknown'))}" role="img"><defs><radialGradient id="${id}-g"><stop stop-color="#d9ddd8"/><stop offset="1" stop-color="#aeb9b3"/></radialGradient></defs><ellipse cx="60" cy="101" rx="37" ry="6" fill="#8d9d94" opacity=".16"/><path d="M23 77C24 56 39 36 60 35s36 20 37 42c1 17-16 25-37 25S24 94 23 77Z" fill="url(#${id}-g)" opacity=".56"/><ellipse cx="49" cy="69" rx="3" ry="4" fill="#f8faf7" opacity=".66"/><ellipse cx="71" cy="69" rx="3" ry="4" fill="#f8faf7" opacity=".66"/></svg>`;
 }

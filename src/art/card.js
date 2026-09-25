@@ -1,3 +1,5 @@
+import { getLang, t } from '../i18n/index.js';
+
 const EXPORTERS = new Map();
 const CARD = { width: 1200, padding: 56, columns: 3, cellWidth: 362, imageSize: 150, rowHeight: 246 };
 
@@ -7,7 +9,10 @@ function roundedRect(context, x, y, width, height, radius) {
 }
 
 function wrapText(context, text, maxWidth, lineHeight, maxLines = 3) {
-  const characters = Array.from(String(text ?? '').trim());
+  // 依目前語系斷詞：英文以單字換行，中日文以詞／字換行；單一詞過長時再拆成字元
+  const segmenter = new Intl.Segmenter(getLang(), { granularity: 'word' });
+  const characters = Array.from(segmenter.segment(String(text ?? '').trim()), ({ segment }) => segment)
+    .flatMap((segment) => (context.measureText(segment).width > maxWidth ? Array.from(segment) : [segment]));
   const lines = [];
   let line = '';
   let truncated = false;
@@ -51,16 +56,19 @@ function imageFromSvg(svg) {
 }
 
 /** 匯出高解析度圖鑑卡；SVG 先以向量載入，再繪製至雙倍尺寸畫布。 */
-export async function exportCardPng({ title = '史萊姆花園圖鑑', entries = [], footer = '' } = {}) {
+export async function exportCardPng({ title = t('codex'), entries = [], footer = '' } = {}) {
   if (typeof document === 'undefined' || typeof Image === 'undefined') throw new Error('PNG 匯出需要瀏覽器畫布');
   const safeEntries = Array.isArray(entries) ? entries : [];
   const rows = Math.max(1, Math.ceil(safeEntries.length / CARD.columns));
   const height = CARD.padding * 2 + 100 + rows * CARD.rowHeight + 64;
   const ratio = 2;
   const canvas = document.createElement('canvas');
+  // 標註語系，讓中日文共用漢字選到正確字形
+  canvas.lang = getLang();
   canvas.width = CARD.width * ratio;
   canvas.height = height * ratio;
   const context = canvas.getContext('2d');
+  if (context && 'lang' in context) context.lang = getLang();
   if (!context) throw new Error('無法建立圖鑑畫布');
   context.scale(ratio, ratio);
   context.fillStyle = '#fffaf1';

@@ -1,8 +1,8 @@
 export const CONFIG = {
-  saveVersion: 1,
+  saveVersion: 2,
   pacing: { firstMergeMs: 30000, allBaseSpeciesMs: 3600000, firstMutationMs: 300000, firstRareMutationMs: 1800000, introRecipesMs: 3600000, firstPrestigeMs: [14400000, 21600000] },
   storage: { saveKey: 'slimegarden-save', backupKey: 'slimegarden-backup' },
-  tank: { capacity: 60, decorationCapacity: 80, coordinateMin: 0, coordinateMax: 1 },
+  tank: { capacity: 60, decorationCapacity: 80, coordinateMin: 0, coordinateMax: 1, canvasWidth: 960, canvasHeight: 560 },
   time: {
     secondMs: 1000,
     minuteMs: 60000,
@@ -78,5 +78,19 @@ export const CONFIG = {
   },
   merge: { requiredSlimes: 3, maximumTier: 10, autoMergeDefault: false },
   decorations: { placementBounds: [0, 1], clickDoesNotAffectProduction: true },
+  ui: {
+    autosaveMs: 10000,
+    renderMs: 1000,
+    offlinePromptMs: 60000,
+    toastMs: 4200,
+    phaseTransitionMs: 1200,
+    recipeRowHeight: 88,
+    compactRecipeRowHeight: 65,
+    codex: { cardWidth: 98, cardHeight: 98, compactCardWidth: 72, compactCardHeight: 70, illustrationSize: 72, detailSize: 140, exportSize: 150 },
+    slimeCardWidth: 104,
+    compactSlimeCardWidth: 74,
+    slimeCardHeight: 70,
+    compactSlimeCardHeight: 55,
+  },
   milestones: { titleId: 'hundred_little_pokes' },
 };

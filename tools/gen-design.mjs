@@ -16,13 +16,13 @@ const duration = (milliseconds) => milliseconds < CONFIG.time.minuteMs
 const kindCount = (kind) => SPECIES.filter((species) => species.kind === kind).length;
 const baseCosts = Object.entries(CONFIG.economy.summonUnlockCosts)
   .sort((first, second) => first[1] - second[1])
-  .map(([id, cost]) => `${byId.get(id).name.zh} ${cost}`)
+  .map(([id, cost]) => `${byId.get(id).name['zh-Hant']} ${cost}`)
   .join('；');
 const recipeRows = [...byStage].map(([stage, recipes]) => {
   const list = recipes.map((recipe) => {
     const mark = recipe.hidden ? '（隱藏）' : '';
     const time = recipe.time === 'any' ? '不限時段' : recipe.time === 'day' ? '日間' : '夜間';
-    return `- ${byId.get(recipe.id).name.zh}${mark}：${byId.get(recipe.a).name.zh}（${recipe.tierA} 階）＋${byId.get(recipe.b).name.zh}（${recipe.tierB} 階），${time}`;
+    return `- ${byId.get(recipe.id).name['zh-Hant']}${mark}：${byId.get(recipe.a).name['zh-Hant']}（${recipe.tierA} 階）＋${byId.get(recipe.b).name['zh-Hant']}（${recipe.tierB} 階），${time}`;
   }).join('\n');
   return `### ${stage}（${recipes.length} 種）\n${list}`;
 }).join('\n\n');
@@ -31,12 +31,12 @@ const mutationRows = Object.entries(MUTATIONS).map(([dimension, definition]) => 
     const bonus = dimension === 'hue' ? `黏液產速 ${percent(level.gelRate)}`
       : dimension === 'gloss' ? `離線效率 ${percent(level.offlineRate)}`
         : `變異率 +${percent(level.mutationRate)}；離線上限 +${level.offlineCapMinutes} 分鐘；合成費用 -${percent(level.mergeCostDiscount)}；原初之泥 +${percent(level.prestigeMudRate)}`;
-    return `${level.name.zh}：${bonus}`;
+    return `${level.name['zh-Hant']}：${bonus}`;
   }).join('；');
-  return `- **${definition.name.zh}**：${levels}`;
+  return `- **${definition.name['zh-Hant']}**：${levels}`;
 }).join('\n');
-const upgradeRows = UPGRADES.map((upgrade) => `- ${upgrade.name.zh}（上限 ${upgrade.maxLevel} 級；每級原初之泥 ${upgrade.costs.join('、')}）：${Object.entries(upgrade.effectPerLevel).map(([key, value]) => `${key} ${key === 'offlineCapHours' ? `+${value} 小時` : `+${percent(value)}`}`).join('、')}`).join('\n');
-const decorationRows = DECORATIONS.map((item) => `- ${item.name.zh}：廢料 ${item.cost.scrap}、黏液 ${item.cost.gel}、星塵 ${item.cost.stardust}；預設位置 (${item.placement.x}, ${item.placement.y})`).join('\n');
+const upgradeRows = UPGRADES.map((upgrade) => `- ${upgrade.name['zh-Hant']}（上限 ${upgrade.maxLevel} 級；每級原初之泥 ${upgrade.costs.join('、')}）：${Object.entries(upgrade.effectPerLevel).map(([key, value]) => `${key} ${key === 'offlineCapHours' ? `+${value} 小時` : `+${percent(value)}`}`).join('、')}`).join('\n');
+const decorationRows = DECORATIONS.map((item) => `- ${item.name['zh-Hant']}：廢料 ${item.cost.scrap}、黏液 ${item.cost.gel}、星塵 ${item.cost.stardust}；預設位置 (${item.placement.x}, ${item.placement.y})`).join('\n');
 const text = `# 史萊姆花園數值設計
 
 > 本檔由 \`node tools/gen-design.mjs\` 從 \`src/data/\` 產生；請勿手動修改。
@@ -55,7 +55,7 @@ const text = `# 史萊姆花園數值設計
 - 物種共 ${SPECIES.length} 種：原生 ${kindCount('starter')}、基礎 ${kindCount('base')}、配方 ${kindCount('recipe')}、原初 ${kindCount('primal')}。
 - 缸內最多容納 ${CONFIG.tank.capacity} 隻史萊姆；階級範圍為 1～${CONFIG.merge.maximumTier} 階，${CONFIG.merge.requiredSlimes} 隻同種同階合成一隻高一階。
 - 基礎物種首次召喚解鎖費由低至高：${baseCosts}。
-- 原初系首次轉生後可用原初之泥召喚：${Object.entries(CONFIG.economy.primalSpeciesCost).map(([id, cost]) => `${byId.get(id).name.zh} ${cost}`).join('；')}。原初物種不消耗黏液。
+- 原初系首次轉生後可用原初之泥召喚：${Object.entries(CONFIG.economy.primalSpeciesCost).map(([id, cost]) => `${byId.get(id).name['zh-Hant']} ${cost}`).join('；')}。原初物種不消耗黏液。
 - 一般召喚基礎費 ${CONFIG.economy.repeatSummonCost} 黏液；階級費用由 ${CONFIG.economy.summonTierCostMultiplier} 倍數遞增。星塵可召喚超過物種當前進度的材料：${Object.entries(CONFIG.economy.stardustSummonTierCosts).map(([tier, cost]) => `${tier}階 ${cost}`).join('；')}。
 
 ## 配方
