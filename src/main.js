@@ -267,14 +267,23 @@ async function enableAudio() {
   saveNow();
 }
 
-// 瀏覽器要求使用者手勢才能發聲：回訪玩家已同意過音效，第一次點擊畫面時自動解鎖
-function unlockAudioOnGesture() {
-  document.removeEventListener('pointerdown', unlockAudioOnGesture, true);
-  document.removeEventListener('keydown', unlockAudioOnGesture, true);
-  if (state.settings.soundEnabled !== false && state.settings.soundPromptSeen) enableAudio();
+// 瀏覽器要求使用者手勢才能發聲：回訪玩家已同意過音效，點擊畫面時自動解鎖。
+// 觸控的 pointerdown 不算有效手勢（要到 pointerup／touchend／click 才算），所以同時監聽多種事件，
+// 並且直到音訊真的開始運作才移除；iOS 切回前景時音訊可能被暫停，屆時重新掛上。
+const AUDIO_GESTURES = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
+function armAudioUnlock() {
+  for (const type of AUDIO_GESTURES) document.addEventListener(type, unlockAudioOnGesture, true);
 }
-document.addEventListener('pointerdown', unlockAudioOnGesture, true);
-document.addEventListener('keydown', unlockAudioOnGesture, true);
+function disarmAudioUnlock() {
+  for (const type of AUDIO_GESTURES) document.removeEventListener(type, unlockAudioOnGesture, true);
+}
+// 每次手勢都同步呼叫 resume（即使前一次還在等），重複的播放請求由 bgm 內部序號去重
+async function unlockAudioOnGesture() {
+  if (state.settings.soundEnabled === false || !state.settings.soundPromptSeen) return;
+  await enableAudio();
+  if (bgm.isRunning()) disarmAudioUnlock();
+}
+armAudioUnlock();
 
 async function handleAction(action, value) {
   if (action === 'summon') {
@@ -538,7 +547,10 @@ document.addEventListener('contextmenu', (event) => {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) saveNow();
-  else resumeOffline();
+  else {
+    resumeOffline();
+    if (!bgm.isRunning()) armAudioUnlock();
+  }
 });
 window.addEventListener('pagehide', saveNow);
 

@@ -21,6 +21,8 @@ const lastPlayed = { day: null, night: null };
 let currentPhase;
 let current;
 let request = 0;
+// 正在載入中的時段；一次點擊會觸發多個手勢事件，避免重複開播
+let loadingPhase = null;
 const loaded = new Map();
 
 function audio() {
@@ -143,12 +145,15 @@ async function play(phase) {
   const myRequest = ++request;
   currentPhase = phase;
   const file = nextTrack(phase);
+  loadingPhase = phase;
   let track;
   try {
     track = await loadTrack(file);
   } catch (error) {
     console.warn(error);
     return;
+  } finally {
+    if (myRequest === request) loadingPhase = null;
   }
   if (myRequest !== request) return;
   const destination = ctx.createGain();
@@ -172,6 +177,7 @@ async function play(phase) {
 
 function stop() {
   request += 1;
+  loadingPhase = null;
   if (!current || !context) return;
   const previous = current;
   current = null;
@@ -207,7 +213,8 @@ export const bgm = {
   async unlock() {
     const ctx = audio();
     if (ctx) {
-      if (ctx.state !== 'running') await ctx.resume();
+      // 非有效手勢時 resume 可能一直懸著，限時等待，讓下一次手勢還能再試
+      if (ctx.state !== 'running') await Promise.race([ctx.resume(), new Promise((resolve) => setTimeout(resolve, CONFIG.audio.unlockWaitMs))]);
       unlocked = ctx.state === 'running';
     }
   },
@@ -215,5 +222,6 @@ export const bgm = {
   stop,
   setMuted,
   setVolume,
-  isPlaying: () => Boolean(current),
+  isPlaying: () => Boolean(current) || loadingPhase !== null,
+  isRunning: () => unlocked && context?.state === 'running',
 };

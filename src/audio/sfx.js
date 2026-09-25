@@ -1,3 +1,4 @@
+import { CONFIG } from '../data/config.js';
 let unlocked = false;
 const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
 let context;
@@ -123,7 +124,7 @@ export const sfx = {
   async unlock() {
     const ctx = audio();
     if (ctx) {
-      if (ctx.state !== 'running') await ctx.resume();
+      if (ctx.state !== 'running') await Promise.race([ctx.resume(), new Promise((resolve) => setTimeout(resolve, CONFIG.audio.unlockWaitMs))]);
       unlocked = ctx.state === 'running';
     }
   },

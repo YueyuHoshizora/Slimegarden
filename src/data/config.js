@@ -79,7 +79,7 @@ export const CONFIG = {
   merge: { requiredSlimes: 3, maximumTier: 10, autoMergeDefault: false },
   decorations: { placementBounds: [0, 1], clickDoesNotAffectProduction: true },
   // 音樂基準增益（玩家音量會再乘上去）與新存檔的預設音量
-  audio: { bgmMasterGain: 0.275, defaultVolume: 0.5 },
+  audio: { bgmMasterGain: 0.275, defaultVolume: 0.5, unlockWaitMs: 400 },
   ui: {
     autosaveMs: 10000,
     renderMs: 1000,
