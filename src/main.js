@@ -250,17 +250,27 @@ function attemptRecipe() {
 
 async function enableAudio() {
   state.settings.soundPromptSeen = true;
+  state.settings.soundEnabled = true;
   ui.setSoundPromptSeen();
   try {
     await Promise.all([sfx.unlock(), bgm.unlock()]);
     sfx.setMuted(Boolean(state.settings.sfxMuted));
     bgm.setMuted(Boolean(state.settings.bgmMuted));
-    if (!state.settings.bgmMuted) await bgm.play(phase);
+    if (!state.settings.bgmMuted && !bgm.isPlaying()) await bgm.play(phase);
   } catch {
     ui.toast(t('soundWelcome'));
   }
   saveNow();
 }
+
+// 瀏覽器要求使用者手勢才能發聲：回訪玩家已同意過音效，第一次點擊畫面時自動解鎖
+function unlockAudioOnGesture() {
+  document.removeEventListener('pointerdown', unlockAudioOnGesture, true);
+  document.removeEventListener('keydown', unlockAudioOnGesture, true);
+  if (state.settings.soundEnabled !== false && state.settings.soundPromptSeen) enableAudio();
+}
+document.addEventListener('pointerdown', unlockAudioOnGesture, true);
+document.addEventListener('keydown', unlockAudioOnGesture, true);
 
 async function handleAction(action, value) {
   if (action === 'summon') {
@@ -279,15 +289,15 @@ async function handleAction(action, value) {
   if (action === 'toggle-music') {
     state.settings.bgmMuted = !state.settings.bgmMuted;
     bgm.setMuted(state.settings.bgmMuted);
-    if (!state.settings.bgmMuted) {
-      try { await bgm.play(phase); } catch { ui.toast(t('soundWelcome')); }
-    }
+    // 開啟即視為同意音效，順便解鎖（音訊需使用者手勢）
+    if (!state.settings.bgmMuted) await enableAudio();
     updateAfterAction();
     return;
   }
   if (action === 'toggle-effects') {
     state.settings.sfxMuted = !state.settings.sfxMuted;
     sfx.setMuted(state.settings.sfxMuted);
+    if (!state.settings.sfxMuted) await enableAudio();
     updateAfterAction();
     return;
   }
@@ -302,7 +312,7 @@ async function handleAction(action, value) {
     return;
   }
   if (action === 'enable-sound') { await enableAudio(); render(); return; }
-  if (action === 'dismiss-sound') { state.settings.soundPromptSeen = true; ui.setSoundPromptSeen(); saveNow(); return; }
+  if (action === 'dismiss-sound') { state.settings.soundPromptSeen = true; state.settings.soundEnabled = false; ui.setSoundPromptSeen(); saveNow(); return; }
   if (action === 'craft-decoration') {
     const result = craftDecoration(state, value);
     if (!result.ok) ui.toast(notEnoughMessage(result));

@@ -1,8 +1,11 @@
 const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
+// 白天 16 首、夜晚 8 首；day1、day2、night1 為手寫，其餘由 tools/gen-bgm.mjs 產生
 const TRACKS = {
-  day: ['day1.json', 'day2.json'],
-  night: ['night1.json'],
+  day: Array.from({ length: 16 }, (_, index) => `day${index + 1}.json`),
+  night: Array.from({ length: 8 }, (_, index) => `night${index + 1}.json`),
 };
+// 每首循環幾次後換下一首
+const LOOPS_PER_TRACK = 2;
 const CHANNEL_VOLUME = { pulse1: 0.12, pulse2: 0.075, triangle: 0.13, noise: 0.018 };
 let context;
 let master;
@@ -11,7 +14,10 @@ let muted = false;
 let volume = 1;
 let unlocked = false;
 let noiseBuffer;
-let nextDay = 0;
+// 各時段的播放佇列（洗牌後依序播放，播完再洗）
+const queues = { day: [], night: [] };
+const lastPlayed = { day: null, night: null };
+let currentPhase;
 let current;
 let request = 0;
 const loaded = new Map();
@@ -76,7 +82,7 @@ function noteSound(track, channel, event, when, destination) {
   oscillator.stop(when + event[2] + 0.012);
 }
 
-function startTrack(track, destination) {
+function startTrack(track, destination, onFinish) {
   const beatSeconds = 60 / track.tempo;
   const loopBeats = track.bars * track.beatsPerBar;
   const phraseBeats = track.phraseBeats || loopBeats;
@@ -106,9 +112,27 @@ function startTrack(track, destination) {
         }
       }
       beatCursor += 0.25;
+      if (beatCursor === loopBeats * LOOPS_PER_TRACK) onFinish();
     }
   }, 45);
   return timer;
+}
+
+function nextTrack(phase) {
+  const queue = queues[phase];
+  if (!queue.length) {
+    const order = [...TRACKS[phase]];
+    for (let i = order.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    // 換輪時避免同一首連續出現
+    if (order[0] === lastPlayed[phase] && order.length > 1) order.push(order.shift());
+    queue.push(...order);
+  }
+  const file = queue.shift();
+  lastPlayed[phase] = file;
+  return file;
 }
 
 async function play(phase) {
@@ -116,7 +140,8 @@ async function play(phase) {
   const ctx = audio();
   if (!ctx || ctx.state !== 'running') return;
   const myRequest = ++request;
-  const file = TRACKS[phase][phase === 'day' ? nextDay++ % TRACKS.day.length : 0];
+  currentPhase = phase;
+  const file = nextTrack(phase);
   let track;
   try {
     track = await loadTrack(file);
@@ -130,7 +155,10 @@ async function play(phase) {
   destination.connect(master);
   const previous = current;
   current = { destination, timer: null };
-  current.timer = startTrack(track, destination);
+  current.timer = startTrack(track, destination, () => {
+    // 同一時段的下一首；若期間已切換時段或停止，交由新的請求處理
+    if (current?.destination === destination && currentPhase === phase) play(phase);
+  });
   destination.gain.setTargetAtTime(1, ctx.currentTime, 0.45);
   if (previous) {
     previous.destination.gain.setTargetAtTime(0, ctx.currentTime, 0.45);
@@ -186,4 +214,5 @@ export const bgm = {
   stop,
   setMuted,
   setVolume,
+  isPlaying: () => Boolean(current),
 };
