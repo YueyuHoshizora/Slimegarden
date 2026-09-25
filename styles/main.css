@@ -38,12 +38,50 @@ button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-
 button:disabled { cursor: default; opacity: .5; }
 button.primary { color: #fff; border-color: #82b99b; background: #82b99b; }
 button.primary:hover:not(:disabled) { background: #6eaa88; }
+button.danger { color: #b8606e; border-color: #f2c4cc; background: var(--pink); }
+button.danger:hover:not(:disabled) { background: #ffdbe2; }
+button.primary.danger { color: #fff; border-color: #e0909d; background: #e0909d; }
+button.primary.danger:hover:not(:disabled) { background: #d27d8b; }
+.settings-actions .danger { grid-column: 1 / -1; }
 button.soft { background: #f0f7eb; }
 button.icon-button { display: inline-grid; place-items: center; width: 46px; padding: 0; font-size: 1.15rem; }
 select, input[type="text"], textarea { border: 1px solid var(--line); border-radius: 13px; background: #fffefa; padding: 8px 10px; }
+/* 下拉選單：收合狀態全瀏覽器統一成圓角奶油色＋綠色箭頭 */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  border-color: #dfe8d8;
+  background: #fffefa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%2378a78a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  box-shadow: 0 2px 6px rgba(100, 121, 104, .06);
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+}
+select:hover:not(:disabled) { border-color: #b9dcc6; background-color: #f6fbf2; }
+select:disabled { cursor: default; opacity: .5; }
+/* 支援 base-select 的瀏覽器（Chromium 135+）連展開後的清單一起換成花園風格；其他瀏覽器維持原生清單 */
+@supports (appearance: base-select) {
+  select, ::picker(select) { appearance: base-select; }
+  select { display: inline-flex; align-items: center; }
+  select::picker-icon { display: none; }
+  ::picker(select) {
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px solid #dfe8d8;
+    border-radius: 16px;
+    background: #fffefa;
+    box-shadow: 0 12px 28px rgba(100, 121, 104, .18);
+    max-height: min(60vh, 360px);
+  }
+  select option { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px; border-radius: 11px; color: var(--ink); cursor: pointer; }
+  select option:hover, select option:focus-visible { background: var(--mint); outline: none; }
+  select option:checked { background: #e2f2e4; font-weight: 750; }
+  select option::checkmark { order: 1; margin-left: auto; color: #6eaa88; }
+  select option:disabled { color: var(--muted); opacity: .55; cursor: default; }
+}
 button, select, input, textarea, .file-button { touch-action: manipulation; }
 
-#app { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
+#app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
 .topbar, .actionbar, .panel, .garden-stage, .mobile-tabs { border: 1px solid rgba(222, 229, 215, .92); background: rgba(255, 254, 249, .9); box-shadow: var(--shadow); }
 .topbar { display: flex; align-items: center; gap: 14px; min-height: 70px; padding: 8px 16px; border-radius: 24px; }
 .brand { display: flex; align-items: center; gap: 9px; min-width: max-content; font-weight: 800; letter-spacing: .02em; }
@@ -179,6 +217,35 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
 .toast { max-width: min(400px, calc(100vw - 32px)); padding: 11px 16px; border: 1px solid rgba(255,255,255,.92); border-radius: 16px; background: rgba(255, 252, 240, .96); box-shadow: var(--shadow); color: #536b5b; font-size: .82rem; animation: toast-in .2s ease-out; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 
+/* 入口畫面：蓋住整個遊戲，淡出後才露出花園 */
+.title-screen { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: hidden; padding: 16px; background: radial-gradient(ellipse at 50% 18%, #fffaf0 0%, #f6f4e6 42%, #e3f2e4 100%); transition: opacity .45s ease, visibility .45s; }
+.title-screen[hidden] { display: none; }
+.title-screen.leaving { opacity: 0; visibility: hidden; }
+.title-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(100%, 420px); padding: 26px 24px 22px; border: 1px solid rgba(255, 255, 255, .9); border-radius: 30px; background: rgba(255, 254, 249, .78); box-shadow: 0 18px 44px rgba(100, 121, 104, .16); text-align: center; backdrop-filter: blur(6px); }
+.title-slime { width: 150px; height: 150px; margin-bottom: 2px; transform-origin: 50% 100%; animation: title-bounce 2.4s ease-in-out infinite; }
+/* 圖鑑插畫自帶方形底色，入口畫面只留史萊姆本體 */
+.title-slime svg > rect:first-of-type { fill-opacity: 0; }
+.title-slime svg { display: block; width: 100%; height: 100%; }
+.title-heading { margin: 0; color: #4f7a61; font-size: clamp(1.45rem, 7.5vw, 2.5rem); font-weight: 850; letter-spacing: .06em; }
+.title-sub { margin: -6px 0 0; color: #93ab98; font-size: .9rem; font-weight: 700; letter-spacing: .18em; }
+.title-sub[hidden] { display: none; }
+.title-tagline { max-width: 30em; margin: 4px 0 8px; color: var(--muted); font-size: .88rem; line-height: 1.6; }
+.title-start { min-width: 200px; min-height: 52px; padding-inline: 28px; border-radius: 26px; font-size: 1.05rem; font-weight: 800; letter-spacing: .06em; box-shadow: 0 8px 18px rgba(110, 170, 136, .32); }
+.title-language { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--muted); font-size: .8rem; }
+.title-language select { width: 132px; }
+.title-bubbles span { position: absolute; bottom: -80px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .95), rgba(178, 225, 196, .45) 60%, rgba(178, 225, 196, .15)); animation: title-float 14s linear infinite; }
+.title-bubbles span:nth-child(1) { left: 8%; width: 46px; height: 46px; animation-delay: -2s; }
+.title-bubbles span:nth-child(2) { left: 22%; width: 22px; height: 22px; animation-duration: 10s; animation-delay: -7s; }
+.title-bubbles span:nth-child(3) { left: 44%; width: 30px; height: 30px; animation-duration: 16s; animation-delay: -4s; }
+.title-bubbles span:nth-child(4) { left: 66%; width: 54px; height: 54px; animation-duration: 18s; animation-delay: -11s; }
+.title-bubbles span:nth-child(5) { left: 81%; width: 26px; height: 26px; animation-duration: 12s; animation-delay: -1s; }
+.title-bubbles span:nth-child(6) { left: 92%; width: 38px; height: 38px; animation-delay: -9s; }
+@keyframes title-bounce { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-14px) scale(.96, 1.05); } 55% { transform: translateY(0) scale(1.06, .93); } 68% { transform: translateY(-3px) scale(.98, 1.02); } }
+@keyframes title-float { from { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } to { transform: translateY(-115vh); opacity: .2; } }
+@media (max-height: 600px) { .title-slime { width: 96px; height: 96px; } .title-card { gap: 6px; padding-block: 16px; } .title-tagline { margin-block: 0 4px; } }
+@media (max-height: 600px) and (max-width: 599px) { .save-code { min-height: 44px; } .settings-panel .inline-settings, .settings-panel .settings-actions { gap: 3px; } }
+@media (prefers-reduced-motion: reduce) { .title-slime, .title-bubbles span { animation: none; } .title-bubbles { display: none; } }
+
 @media (max-width: 1279px) and (min-width: 1024px) {
   #app { padding: 9px; gap: 8px; }
   .layout { grid-template-columns: minmax(230px, .92fr) minmax(340px, 1.5fr) minmax(245px, 1fr); gap: 8px; }
@@ -227,16 +294,21 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
   .brand { gap: 5px; font-size: .8rem; }
   .brand-mark { width: 32px; height: 32px; font-size: 17px; }
   .brand-title { max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 窄手機上標題文字會把頂列撐出畫面，只留圓形標誌 */
+  @media (max-width: 420px) { .brand-title { display: none; } }
   .resource-row { justify-content: flex-end; gap: 3px; }
   .resource-chip { display: flex; flex-direction: column; gap: 0; min-width: 37px; min-height: 39px; padding: 3px 4px; border-radius: 11px; font-size: .59rem; line-height: 1.05; }
   .resource-chip .resource-label { display: none; }
   .resource-icon { font-size: .75rem; }
   .resource-value { font-size: .65rem; }
   .top-controls { gap: 4px; }
-  .top-controls select { width: 63px; min-height: 44px; padding: 4px; font-size: .69rem; }
+  .top-controls select { width: 63px; min-height: 44px; padding: 4px 18px 4px 6px; background-position: right 6px center; font-size: .69rem; }
   .top-controls .phase-chip { display: none; }
   .top-controls .icon-button { width: 44px; min-height: 44px; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 38%) minmax(0, 1fr); grid-template-areas: "garden" "side"; gap: 6px; }
+  /* 手機設定頁按鈕與存檔欄較多，暫時收起花園讓設定用滿整個版面 */
+  .layout[data-panel="settings"] { grid-template-rows: minmax(0, 1fr); grid-template-areas: "side"; }
+  .layout[data-panel="settings"] .garden-stage { display: none; }
   .garden-stage { grid-area: garden; grid-template-rows: auto minmax(0, 1fr) auto; gap: 4px; padding: 6px; border-radius: 18px; }
   .stage-head { min-height: 31px; }
   .stage-title { font-size: .85rem; }
@@ -276,7 +348,6 @@ button, select, input, textarea, .file-button { touch-action: manipulation; }
   .milestone { font-size: .53rem; padding: 4px 1px; }
   .settings-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
   .settings-actions button, .settings-actions .file-button { min-height: 44px; padding: 4px; font-size: .67rem; }
-  .settings-actions .wide-action { grid-column: span 2; }
   .setting-row { min-height: 44px; padding: 3px 7px; font-size: .72rem; }
   .setting-row select { min-height: 44px; }
   .inline-settings { gap: 5px; }

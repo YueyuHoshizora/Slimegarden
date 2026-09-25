@@ -84,6 +84,7 @@ export const CONFIG = {
     offlinePromptMs: 60000,
     toastMs: 4200,
     phaseTransitionMs: 1200,
+    titleFadeMs: 450,
     recipeRowHeight: 88,
     compactRecipeRowHeight: 65,
     codex: { cardWidth: 98, cardHeight: 98, compactCardWidth: 72, compactCardHeight: 70, illustrationSize: 72, detailSize: 140, exportSize: 150 },

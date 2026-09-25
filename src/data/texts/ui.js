@@ -1,5 +1,8 @@
 export const UI = {
   gameTitle: { 'zh-Hant': '史萊姆花園', en: 'Slimegarden', ja: 'スライムガーデン' },
+  titleTagline: { 'zh-Hant': '召喚、合成、慢慢收集，陪史萊姆們一起過日子。', en: 'Summon, merge, and slowly collect — a cozy life with your slimes.', ja: '召喚して、合成して、ゆっくり集めて。スライムたちとのんびり暮らそう。' },
+  startGame: { 'zh-Hant': '開始遊戲', en: 'Start', ja: 'はじめる' },
+  continueGame: { 'zh-Hant': '回到花園', en: 'Return to Garden', ja: '庭にもどる' },
   gel: { 'zh-Hant': '黏液', en: 'Gel', ja: 'ジェル' },
   stardust: { 'zh-Hant': '星塵', en: 'Stardust', ja: '星くず' },
   primalMud: { 'zh-Hant': '原初之泥', en: 'Primal Mud', ja: '原初の泥' },
@@ -60,6 +63,9 @@ export const UI = {
   backupRestore: { 'zh-Hant': '還原上次備份', en: 'Restore Previous Backup', ja: '前回のバックアップを復元' },
   backupReady: { 'zh-Hant': '已為目前花園留好一份備份。', en: 'A backup of your current garden is ready.', ja: '今の庭のバックアップを保存しました。' },
   backupMissing: { 'zh-Hant': '目前沒有可還原的備份。', en: 'There is no backup to restore yet.', ja: '復元できるバックアップはまだありません。' },
+  restartGarden: { 'zh-Hant': '重新開始搜集', en: 'Start a New Collection', ja: 'はじめから集めなおす' },
+  restartConfirm: { 'zh-Hant': '花園裡的史萊姆、黏液、圖鑑與轉生紀錄都會回到最初，只保留語言與音量設定。目前的進度會先存成備份，反悔時可用「還原上次備份」找回（會取代原本的備份）。確定要重新開始嗎？', en: 'Your slimes, Gel, codex, and renewals will all return to the very beginning. Only language and volume settings stay. Your current garden is saved as a backup first, so "Restore Previous Backup" can bring it back (this replaces the older backup). Start over?', ja: 'スライム、ジェル、図鑑、めぐりの記録がすべて最初に戻ります。言語と音量の設定だけは残ります。今の庭は先にバックアップされ、「前回のバックアップを復元」で戻せます（以前のバックアップは置き換わります）。はじめからにしますか？' },
+  restartDone: { 'zh-Hant': '新的花園準備好了，一起重新相遇吧！', en: 'A fresh garden is ready. Let’s meet everyone again!', ja: '新しい庭の準備ができました。またみんなに会いにいこう！' },
   offlineTitle: { 'zh-Hant': '花園一直替你留著位置', en: 'Your Garden Kept Your Place', ja: '庭はあなたの場所を空けていました' },
   offlineIntro: { 'zh-Hant': '你不在的時候，花園裡也慢慢累積了好多黏黏。', en: 'While you were away, your garden gently gathered some Gel for you.', ja: 'お留守のあいだ、庭ではジェルがゆっくりたまりました。' },
   offlineDuration: { 'zh-Hant': '離開時間：{time}', en: 'Away for: {time}', ja: 'お留守の時間：{time}' },

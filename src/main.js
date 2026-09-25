@@ -1,4 +1,5 @@
 import {
+  backupCurrentSave,
   buyUpgrade,
   createState,
   craftDecoration,
@@ -63,6 +64,9 @@ let lastSaveAt = now;
 let offlineBreakdown = null;
 let mode = 'merge';
 const selectedSlimes = new Set();
+// 入口畫面關閉前先把離線收穫留著，進入花園後再跳出，避免對話框蓋在入口畫面上
+let enteredGarden = false;
+let pendingOffline = null;
 
 const ui = createUI(root, {
   onAction: handleAction,
@@ -312,6 +316,13 @@ async function handleAction(action, value) {
     return;
   }
   if (action === 'enable-sound') { await enableAudio(); render(); return; }
+  if (action === 'enter-garden') {
+    if (enteredGarden) return;
+    enteredGarden = true;
+    ui.hideTitle();
+    if (pendingOffline) { ui.openOffline(pendingOffline); pendingOffline = null; }
+    return;
+  }
   if (action === 'dismiss-sound') { state.settings.soundPromptSeen = true; state.settings.soundEnabled = false; ui.setSoundPromptSeen(); saveNow(); return; }
   if (action === 'craft-decoration') {
     const result = craftDecoration(state, value);
@@ -369,6 +380,23 @@ async function handleAction(action, value) {
     if (!restored) ui.toast(t('backupMissing'));
     else { state = restored; setLang(state.settings.language); ui.toast(t('backupReady')); render(); }
     saveNow();
+    return;
+  }
+  if (action === 'confirm-restart') {
+    // 先存下目前進度並備份，玩家反悔時可用「還原上次備份」找回；語言與音訊設定沿用
+    saveNow();
+    backupCurrentSave();
+    const settings = state.settings;
+    state = createState({ now: Date.now() });
+    state.settings = settings;
+    selectedSlimes.clear();
+    slimeSignature = '';
+    decorationSignature = '';
+    pendingDecorationUid = null;
+    offlineBreakdown = null;
+    saveNow();
+    ui.toast(t('restartDone'));
+    render();
     return;
   }
   if (action === 'install-invite') {
@@ -501,7 +529,10 @@ function resumeOffline() {
   processEvents();
   syncTank();
   saveNow();
-  if (endAt - startedAt >= CONFIG.ui.offlinePromptMs) ui.openOffline(offlineBreakdown);
+  if (endAt - startedAt >= CONFIG.ui.offlinePromptMs) {
+    if (enteredGarden) ui.openOffline(offlineBreakdown);
+    else pendingOffline = offlineBreakdown;
+  }
   render();
 }
 
@@ -521,7 +552,7 @@ if (hadSave) {
   drainEvents(state);
   syncTank(true);
   saveNow();
-  if (offlineBreakdown.requestedTo - offlineBreakdown.requestedFrom >= CONFIG.ui.offlinePromptMs) ui.openOffline(offlineBreakdown);
+  if (offlineBreakdown.requestedTo - offlineBreakdown.requestedFrom >= CONFIG.ui.offlinePromptMs) pendingOffline = offlineBreakdown;
 } else {
   drainEvents(state);
   syncTank(true);
@@ -529,6 +560,7 @@ if (hadSave) {
 // 初次載入直接呈現當下時段，不播放晝夜轉場
 tank.setPhase(phase, 0);
 render();
+ui.showTitle(hadSave);
 
 let lastRenderAt = now;
 const loopHandle = setInterval(() => {

@@ -101,8 +101,21 @@ export function createUI(root, handlers) {
     </footer>
     <nav class="mobile-tabs" aria-label="Garden pages"><button type="button" data-action="switch-panel" data-panel="recipes"></button><button type="button" data-action="switch-panel" data-panel="codex"></button><button type="button" data-action="switch-panel" data-panel="merge"></button><button type="button" data-action="switch-panel" data-panel="settings"></button></nav>
     <dialog class="dialog-shell" id="feature-dialog"><div class="dialog-content" id="dialog-content"></div></dialog>
-    <div class="toast-stack" id="toast-stack" aria-live="polite"></div>`;
+    <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+    <section class="title-screen" id="title-screen" aria-labelledby="title-heading">
+      <div class="title-bubbles" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="title-card">
+        <div class="title-slime" id="title-slime" aria-hidden="true"></div>
+        <h1 class="title-heading" id="title-heading" data-ui="gameTitle"></h1>
+        <p class="title-sub">Slimegarden</p>
+        <p class="title-tagline" data-ui="titleTagline"></p>
+        <button type="button" class="primary title-start" data-action="enter-garden" id="title-start" data-ui="startGame"></button>
+        <label class="title-language"><span data-ui="language"></span><select data-language aria-label="Language"></select></label>
+      </div>
+    </section>`;
   root.innerHTML = rootHtml;
+  const titleScreen = root.querySelector('#title-screen');
+  root.querySelector('#title-slime').innerHTML = slimeSvg(SPECIES_BY_ID.get(CONFIG.economy.startingSpecies), { tier: 1, hue: 0, gloss: 0, core: 0, size: 150 });
   const sideStack = root.querySelector('.side-stack');
   sideStack.prepend(root.querySelector('#recipe-panel'));
   sideStack.prepend(sideStack.querySelector('.side-route-nav'));
@@ -112,6 +125,7 @@ export function createUI(root, handlers) {
 
   function localizedShell() {
     root.querySelectorAll('[data-ui]').forEach((element) => { element.textContent = t(element.dataset.ui); });
+    root.querySelector('.title-sub').hidden = getLang() === 'en';
     root.querySelectorAll('[data-action="open-settings"]').forEach((button) => { button.setAttribute('aria-label', t('settings')); button.title = t('settings'); });
     root.querySelectorAll('[data-language]').forEach((select) => select.setAttribute('aria-label', t('language')));
     root.querySelector('#tank-canvas').setAttribute('aria-label', t('garden'));
@@ -129,11 +143,14 @@ export function createUI(root, handlers) {
     root.querySelectorAll('[data-action="codex-tab"]').forEach((button) => { button.textContent = t(tabLabels[button.dataset.tab]); button.setAttribute('aria-selected', String(button.dataset.tab === codexTab)); });
     root.querySelectorAll('[data-action="mutation-tab"]').forEach((button) => { button.textContent = t(button.dataset.dimension); button.classList.toggle('active', button.dataset.dimension === mutationDimension); });
     root.querySelectorAll('[data-action="set-mode"]').forEach((button) => { button.textContent = t(button.dataset.mode === 'merge' ? 'modeMerge' : 'modeRecipe'); button.classList.toggle('active', button.dataset.mode === mode); });
+    // 只在語言切換時重寫選項；每次刷新都改寫會讓展開中的原生下拉選單被關閉或跳回
     root.querySelectorAll('[data-language]').forEach((select) => {
-      if (!select.options.length) select.innerHTML = LANGUAGES.map((lang) => `<option value="${lang}">${t(LANGUAGE_LABEL_KEYS[lang])}</option>`).join('');
-      else Array.from(select.options).forEach((option) => { option.textContent = t(LANGUAGE_LABEL_KEYS[option.value]); });
+      const lang = getLang();
+      if (renderedHtml.get(select) === lang) return;
+      renderedHtml.set(select, lang);
+      select.innerHTML = LANGUAGES.map((code) => `<option value="${code}">${t(LANGUAGE_LABEL_KEYS[code])}</option>`).join('');
       select.setAttribute('aria-label', t('language'));
-      if (document.activeElement !== select) select.value = getLang();
+      select.value = lang;
     });
   }
 
@@ -154,8 +171,9 @@ export function createUI(root, handlers) {
         <button type="button" data-action="export-base64">${getLabel('exportBase64')}</button>
         <label class="file-button" for="import-file-${host.id || 'settings'}">${getLabel('importFile')}<input id="import-file-${host.id || 'settings'}" class="import-file" type="file" accept="application/json,.json" data-import-file></label>
         <button type="button" data-action="preview-import">${getLabel('importPreview')}</button>
-        <button type="button" class="wide-action" data-action="restore-backup">${getLabel('backupRestore')}</button>
-        <button type="button" class="wide-action" data-action="install-invite">${getLabel('install')}</button>
+        <button type="button" data-action="restore-backup">${getLabel('backupRestore')}</button>
+        <button type="button" data-action="install-invite">${getLabel('install')}</button>
+        <button type="button" class="danger" data-action="restart-garden">${getLabel('restartGarden')}</button>
       </div>
       <textarea class="save-code" data-import-paste placeholder="${getLabel('importPasteHint')}" aria-label="${getLabel('importPaste')}"></textarea>
       <p class="dialog-copy settings-inline-copy">${getLabel('importSummary')}</p>`;
@@ -163,6 +181,7 @@ export function createUI(root, handlers) {
     const langSelect = host.querySelector('[data-language]');
     langSelect.innerHTML = LANGUAGES.map((lang) => `<option value="${lang}">${t(LANGUAGE_LABEL_KEYS[lang])}</option>`).join('');
     langSelect.value = getLang();
+    renderedHtml.set(langSelect, getLang());
     const paste = host.querySelector('[data-import-paste]');
     paste.value = importValue;
     if (activeElement?.matches('[data-language]')) langSelect.focus();
@@ -171,6 +190,7 @@ export function createUI(root, handlers) {
 
   function setPanel(panel) {
     activePanel = panel;
+    root.querySelector('.layout').dataset.panel = panel;
     root.querySelectorAll('.mobile-tabs [data-panel]').forEach((button) => button.classList.toggle('active', button.dataset.panel === panel));
     root.querySelectorAll('.side-route-nav [data-panel]').forEach((button) => button.classList.toggle('active', button.dataset.panel === panel));
     root.querySelector('#recipe-panel').classList.toggle('active', panel === 'recipes');
@@ -408,6 +428,9 @@ export function createUI(root, handlers) {
     const actions = `${canPrompt ? `<button type="button" class="primary" data-action="prompt-install">${getLabel('install')}</button>` : ''}<button type="button" data-action="dialog-close">${getLabel('installLater')}</button>`;
     openDialog('install', t('installInvitation'), body, actions);
   }
+  function renderRestartConfirm() {
+    openDialog('restart', t('restartGarden'), `<p class="dialog-copy">${getLabel('restartConfirm')}</p>`, `<button type="button" data-action="dialog-close">${getLabel('cancel')}</button><button type="button" class="primary danger" data-action="confirm-restart">${getLabel('restartGarden')}</button>`);
+  }
   async function showCodexDetail(id, detail) {
     const species = SPECIES_BY_ID.get(id);
     const mutationFound = detail?.dimension
@@ -440,6 +463,7 @@ export function createUI(root, handlers) {
     else if (dialogKind === 'import-preview' && pendingImport) showImportPreview(pendingImport);
     else if (dialogKind === 'codex-detail' && dialogData) showCodexDetail(dialogData.id, dialogData.detail);
     else if (dialogKind === 'install') renderInstallMessage(dialogData?.canPrompt ?? false);
+    else if (dialogKind === 'restart') renderRestartConfirm();
   }
 
   function toast(message) {
@@ -471,7 +495,6 @@ export function createUI(root, handlers) {
     root.querySelector('#phase-icon').textContent = phase === 'day' ? '☀️' : '🌙';
     root.querySelector('#phase-name').textContent = t(phase);
     root.querySelectorAll('[data-setting="autoMerge"]').forEach((input) => { input.checked = state.settings.autoMerge; });
-    root.querySelectorAll('[data-language]').forEach((select) => { if (!select.options.length) select.innerHTML = LANGUAGES.map((lang) => `<option value="${lang}">${t(LANGUAGE_LABEL_KEYS[lang])}</option>`).join(''); if (document.activeElement !== select) select.value = getLang(); });
     renderSummonControls(root.querySelector('.actionbar .summon-tools'));
     renderSummonControls(root.querySelector('.merge-summon'));
     renderRecipes();
@@ -526,6 +549,8 @@ export function createUI(root, handlers) {
     }
     if (action === 'preview-import') { handlers.onPreviewImport?.(target.closest('[data-settings-host]')?.querySelector('[data-import-paste]')?.value ?? ''); return; }
     if (action === 'confirm-import') { if (pendingImport) handlers.onConfirmImport?.(pendingImport); pendingImport = null; dialog.close(); return; }
+    if (action === 'restart-garden') { renderRestartConfirm(); return; }
+    if (action === 'confirm-restart') { summonSpecies = CONFIG.economy.startingSpecies; summonTier = 1; activeRecipe = RECIPES[0]?.id; dialog.close(); handlers.onAction?.(action); return; }
     if (action === 'craft-decoration') { handlers.onAction?.(action, target.dataset.id); return; }
     if (action === 'place-decoration') { handlers.onAction?.(action, target.dataset.id); dialog.close(); return; }
     if (action === 'store-decoration') { handlers.onAction?.(action, target.dataset.id); return; }
@@ -580,6 +605,18 @@ export function createUI(root, handlers) {
     openDecorations: renderDecorationsDialog,
     openPrestige: renderPrestigeDialog,
     openOffline(breakdown) { lastOffline = breakdown; renderOfflineDialog(breakdown); },
+    // 入口畫面：有存檔顯示「繼續」，否則「開始」；進入時淡出後移除
+    showTitle(hasSave) {
+      const start = root.querySelector('#title-start');
+      start.dataset.ui = hasSave ? 'continueGame' : 'startGame';
+      start.textContent = t(start.dataset.ui);
+      titleScreen.hidden = false;
+      start.focus();
+    },
+    hideTitle() {
+      titleScreen.classList.add('leaving');
+      setTimeout(() => { titleScreen.hidden = true; titleScreen.classList.remove('leaving'); }, CONFIG.ui.titleFadeMs);
+    },
     showImportPreview,
     closeDialog() { dialog.close(); dialogKind = null; dialogData = null; },
     showInstallMessage(canPrompt = false) { dialogData = { canPrompt }; renderInstallMessage(canPrompt); },
