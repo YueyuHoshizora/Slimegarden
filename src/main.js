@@ -390,8 +390,7 @@ async function handleAction(action, value) {
     state = createState({ now: Date.now() });
     state.settings = settings;
     selectedSlimes.clear();
-    slimeSignature = '';
-    decorationSignature = '';
+    syncTank(true);
     pendingDecorationUid = null;
     offlineBreakdown = null;
     saveNow();
@@ -427,8 +426,7 @@ function confirmImport(preview) {
     setLang(state.settings.language);
     state.settings.language = getLang();
     selectedSlimes.clear();
-    slimeSignature = '';
-    decorationSignature = '';
+    syncTank(true);
     processEvents();
     saveNow();
     render();
