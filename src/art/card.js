@@ -1,7 +1,8 @@
 import { getLang, t } from '../i18n/index.js';
 
 const EXPORTERS = new Map();
-const CARD = { width: 1200, padding: 56, columns: 6, cellWidth: 174, imageSize: 140, rowHeight: 240 };
+// 每行 12 格，畫布寬度 = 左右留白 + 12 格 + 11 道間距
+const CARD = { width: 2288, padding: 56, columns: 12, cellWidth: 174, imageSize: 140, rowHeight: 240 };
 
 function roundedRect(context, x, y, width, height, radius) {
   context.beginPath();
@@ -80,7 +81,7 @@ export async function exportCardPng({ title = t('codex'), entries = [], footer =
   context.fillRect(0, 0, CARD.width, height);
   context.fillStyle = '#fff';
   context.globalAlpha = 0.58;
-  for (const [x, y, radius] of [[80, 72, 22], [1110, 115, 32], [1090, height - 70, 42]]) {
+  for (const [x, y, radius] of [[80, 72, 22], [CARD.width - 90, 115, 32], [CARD.width - 110, height - 70, 42]]) {
     context.beginPath(); context.arc(x, y, radius, 0, Math.PI * 2); context.fill();
   }
   context.globalAlpha = 1;
