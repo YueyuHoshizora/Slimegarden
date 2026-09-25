@@ -55,10 +55,10 @@ self.SW_ASSETS = [
   "/src/data/texts/ui.js?v=d7656652c0",
   "/src/data/upgrades.js?v=b657f17597",
   "/src/i18n/index.js?v=ff2d85621d",
-  "/src/main.js?v=87df2596f6",
+  "/src/main.js?v=a991357fe6",
   "/src/pwa.js?v=d7077bb968",
   "/src/render/tank.js?v=85e058b8f3",
   "/src/ui/view.js?v=8e588aaba5",
   "/styles/main.css?v=16bc9ff3ed"
 ];
-self.SW_VERSION = "606c1d4ad708a3c2";
+self.SW_VERSION = "e32a7ffb0a158b75";

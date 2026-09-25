@@ -387,7 +387,7 @@ async function handleAction(action, value) {
   if (action === 'restore-backup') {
     const restored = restoreBackup();
     if (!restored) ui.toast(t('backupMissing'));
-    else { state = restored; setLang(state.settings.language); ui.toast(t('backupReady')); render(); }
+    else { state = restored; state.settings.language = getLang(); ui.toast(t('backupReady')); render(); }
     saveNow();
     return;
   }
@@ -432,7 +432,7 @@ function confirmImport(preview) {
   try {
     const imported = importSave(JSON.stringify(preview.state));
     state = imported.state;
-    setLang(state.settings.language);
+    // 語言屬於這台裝置的偏好，不跟著存檔碼切換（別人給的存檔可能是其他語言）
     state.settings.language = getLang();
     selectedSlimes.clear();
     syncTank(true);
