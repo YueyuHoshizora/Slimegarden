@@ -9,6 +9,7 @@ self.SW_ASSETS = [
   "/assets/icons/icon-maskable-192.png",
   "/assets/icons/icon-maskable-512.png",
   "/assets/icons/icon.svg",
+  "/assets/og-image.png",
   "/favicon.ico",
   "/index.html",
   "/manifest.webmanifest",
@@ -36,7 +37,7 @@ self.SW_ASSETS = [
   "/src/main.js?v=0c6da644d5",
   "/src/pwa.js?v=d7077bb968",
   "/src/render/tank.js?v=6e8315e8bd",
-  "/src/ui/view.js?v=3a2e1bf570",
+  "/src/ui/view.js?v=6a5963b420",
   "/styles/main.css?v=356d0d3d84"
 ];
-self.SW_VERSION = "8849bf640a656b49";
+self.SW_VERSION = "eeac8cdc6a89aade";

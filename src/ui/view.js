@@ -145,7 +145,7 @@ export function createUI(root, handlers) {
     const importValue = host.querySelector('[data-import-paste]')?.value ?? '';
     const musicMuted = Boolean(state.settings.bgmMuted);
     const effectsMuted = Boolean(state.settings.sfxMuted);
-    host.innerHTML = `
+    const html = `
       <div class="setting-row"><span>${getLabel('language')}</span><select data-language aria-label="${getLabel('language')}"></select></div>
       <div class="setting-row"><span>${getLabel('music')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.bgmVolume ?? 1) * 100)}" style="--fill:${Math.round((state.settings.bgmVolume ?? 1) * 100)}%" data-volume="music" aria-label="${getLabel('music')} ${getLabel('volume')}"><button type="button" data-action="toggle-music">${getLabel(musicMuted ? 'off' : 'on')}</button></div>
       <div class="setting-row"><span>${getLabel('soundEffects')}</span><input type="range" class="volume-slider" min="0" max="100" step="5" value="${Math.round((state.settings.sfxVolume ?? 1) * 100)}" style="--fill:${Math.round((state.settings.sfxVolume ?? 1) * 100)}%" data-volume="effects" aria-label="${getLabel('soundEffects')} ${getLabel('volume')}"><button type="button" data-action="toggle-effects">${getLabel(effectsMuted ? 'off' : 'on')}</button></div>
@@ -159,6 +159,7 @@ export function createUI(root, handlers) {
       </div>
       <textarea class="save-code" data-import-paste placeholder="${getLabel('importPasteHint')}" aria-label="${getLabel('importPaste')}"></textarea>
       <p class="dialog-copy settings-inline-copy">${getLabel('importSummary')}</p>`;
+    if (!setHtml(host, html)) return;
     const langSelect = host.querySelector('[data-language]');
     langSelect.innerHTML = LANGUAGES.map((lang) => `<option value="${lang}">${t(LANGUAGE_LABEL_KEYS[lang])}</option>`).join('');
     langSelect.value = getLang();
@@ -185,6 +186,15 @@ export function createUI(root, handlers) {
     if (kind === 'settings') renderSettings(dialogContent.querySelector('[data-settings-host]'));
   }
 
+  // 定時刷新時若內容沒變就不重建節點，避免游標下的元素被替換而重複觸發 hover
+  const renderedHtml = new WeakMap();
+  function setHtml(element, html, key = html) {
+    if (renderedHtml.get(element) === key) return false;
+    renderedHtml.set(element, key);
+    element.innerHTML = html;
+    return true;
+  }
+
   function renderSettingsDialog() {
     openDialog('settings', t('settings'), '<div class="settings-host inline-settings" data-settings-host></div>');
   }
@@ -200,7 +210,7 @@ export function createUI(root, handlers) {
     }).join('');
     const tiers = Array.from({ length: CONFIG.merge.maximumTier }, (_, index) => index + 1)
       .map((tier) => `<option value="${tier}">${getLabel('tier', { n: tier })}</option>`).join('');
-    host.innerHTML = `<select data-summon-species class="summon-select" aria-label="${getLabel('summonSpecies')}">${speciesOptions}</select><select data-summon-tier aria-label="${getLabel('summonTier')}">${tiers}</select><button type="button" class="primary" data-action="summon">${getLabel('summon')}</button>`;
+    setHtml(host, `<select data-summon-species class="summon-select" aria-label="${getLabel('summonSpecies')}">${speciesOptions}</select><select data-summon-tier aria-label="${getLabel('summonTier')}">${tiers}</select><button type="button" class="primary" data-action="summon">${getLabel('summon')}</button>`);
     root.querySelectorAll('[data-summon-species]').forEach((select) => { select.value = SPECIES_BY_ID.has(summonSpecies) ? summonSpecies : CONFIG.economy.startingSpecies; });
     root.querySelectorAll('[data-summon-tier]').forEach((select) => { select.value = String(summonTier); });
   }
@@ -221,7 +231,7 @@ export function createUI(root, handlers) {
     const pages = Math.max(1, Math.ceil(available.length / size));
     recipePage = Math.min(recipePage, pages - 1);
     const shown = available.slice(recipePage * size, (recipePage + 1) * size);
-    list.innerHTML = shown.map((recipe) => {
+    setHtml(list, shown.map((recipe) => {
       const found = state.codex.recipes.includes(recipe.id);
       const accessible = recipe.stage !== 'run2' || state.meta.prestigeCount > 0;
       const clue = recipe.hidden ? localName(CLUES[recipe.id]) : '';
@@ -236,7 +246,7 @@ export function createUI(root, handlers) {
         </button>
         <button type="button" class="recipe-select" data-action="select-recipe" data-id="${escapeHtml(recipe.id)}" aria-label="${getLabel('selectSlimes')}">${found ? '✓' : '♡'}</button>
       </article>`;
-    }).join('');
+    }).join(''));
     root.querySelector('#recipe-progress').textContent = t('recipeProgress', { n: state.codex.recipes.length, total: RECIPES.length });
     root.querySelector('#recipe-page-label').textContent = `${recipePage + 1} / ${pages}`;
     root.querySelectorAll('[data-action="recipe-page"]').forEach((button) => { button.disabled = Number(button.dataset.step) < 0 ? recipePage === 0 : recipePage >= pages - 1; });
@@ -277,7 +287,7 @@ export function createUI(root, handlers) {
     const current = items.slice(codexPage * pageSize, (codexPage + 1) * pageSize);
     grid.className = `codex-grid${codexTab === 'mutations' ? ' mutation-grid' : ''}`;
     root.querySelector('#mutation-tabs').hidden = codexTab !== 'mutations';
-    grid.innerHTML = current.map((item) => {
+    const gridHtml = current.map((item) => {
       if (item.type === 'species') {
         const label = item.found ? localName(item.species.name) : t('unknown');
         const illustration = item.found ? slimeSvg(item.species, { size: CONFIG.ui.codex.illustrationSize }) : silhouetteSvg(CONFIG.ui.codex.illustrationSize);
@@ -298,6 +308,8 @@ export function createUI(root, handlers) {
       const illustration = item.found ? slimeSvg(item.species, appearance) : silhouetteSvg(CONFIG.ui.codex.illustrationSize);
       return `<button type="button" class="codex-card${item.found ? ' discovered' : ''}" data-action="codex-detail" data-id="${escapeHtml(item.species.id)}" data-dimension="${escapeHtml(mutationDimension)}" data-level="${item.level.id}" aria-label="${label}"><span class="codex-illustration">${illustration}</span><span class="codex-card-name">${label}</span></button>`;
     }).join('');
+    // SVG 內部 id 每次產生都會遞增，比對時忽略
+    setHtml(grid, gridHtml, gridHtml.replace(/\b(slime|silhouette)-\d+/g, ''));
     root.querySelector('#codex-page-label').textContent = `${codexPage + 1} / ${pages}`;
     root.querySelectorAll('[data-action="codex-page"]').forEach((button) => { button.disabled = Number(button.dataset.step) < 0 ? codexPage === 0 : codexPage >= pages - 1; });
     const recipeCount = state.codex.recipes.length;
@@ -311,7 +323,7 @@ export function createUI(root, handlers) {
     root.querySelector('#codex-footer-label').textContent = progress;
     root.querySelector('#codex-progress').textContent = t('total', { n: state.codex.entries.length });
     root.querySelector('[data-action="download-codex"]').textContent = t('downloadCodex');
-    root.querySelector('#milestones').innerHTML = Object.entries(CONFIG.economy.codex.giftMilestones).map(([count]) => `<span class="milestone${state.codex.entries.length >= Number(count) ? ' done' : ''}">${count}</span>`).join('');
+    setHtml(root.querySelector('#milestones'), Object.entries(CONFIG.economy.codex.giftMilestones).map(([count]) => `<span class="milestone${state.codex.entries.length >= Number(count) ? ' done' : ''}">${count}</span>`).join(''));
   }
 
   function renderSlimeList() {
@@ -324,10 +336,10 @@ export function createUI(root, handlers) {
     const pages = Math.max(1, Math.ceil(state.slimes.length / capacity));
     slimePage = Math.min(slimePage, pages - 1);
     const current = state.slimes.slice(slimePage * capacity, (slimePage + 1) * capacity);
-    list.innerHTML = current.map((slime) => {
+    setHtml(list, current.map((slime) => {
       const selected = selectedUids.has(slime.uid);
       return `<button type="button" class="slime-option${selected ? ' selected' : ''}" data-action="select-slime" data-id="${escapeHtml(slime.uid)}" aria-pressed="${selected}"><span>${localName(SPECIES_BY_ID.get(slime.species)?.name)}</span><strong>${getLabel('tier', { n: slime.tier })}</strong></button>`;
-    }).join('') || `<p class="empty-list">${getLabel('noSlimes')}</p>`;
+    }).join('') || `<p class="empty-list">${getLabel('noSlimes')}</p>`);
     root.querySelector('#slime-page-label').textContent = `${slimePage + 1} / ${pages}`;
     root.querySelectorAll('[data-action="slime-page"]').forEach((button) => { button.disabled = Number(button.dataset.step) < 0 ? slimePage === 0 : slimePage >= pages - 1; });
     const count = selectedUids.size;
