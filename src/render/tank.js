@@ -310,9 +310,10 @@ export function createTank(canvas, opts = {}) {
     if (prestigeAt) { ctx.fillStyle = `rgba(255,246,201,${Math.max(0, 1 - (now - prestigeAt) / 1200) * .62})`; ctx.fillRect(0, 0, W, H); }
   }
 
-  function hit(pos) {
+  function hit(pos, ignoredUid = null) {
     let found = null, best = Infinity;
     for (const slime of slimes.values()) {
+      if (slime.uid === ignoredUid) continue;
       const s = slime._tank, distance = Math.hypot(pos.x - s.x, pos.y - s.y);
       if (distance < 55 && distance < best) { found = slime; best = distance; }
     }
@@ -329,11 +330,11 @@ export function createTank(canvas, opts = {}) {
     if (!pointer.id) return;
     const pos = point(event); pointer.x = pos.x; pointer.y = pos.y;
     if (Math.hypot(pos.x - pointer.startX, pos.y - pointer.startY) > 22) pointer.dragging = true;
-    pointer.target = pointer.dragging ? hit(pos)?.uid ?? null : null;
+    pointer.target = pointer.dragging ? hit(pos, pointer.id)?.uid ?? null : null;
   }
   function onUp(event) {
     if (!pointer.id) return;
-    const uid = pointer.id, to = pointer.dragging ? hit(point(event))?.uid : null;
+    const uid = pointer.id, to = pointer.dragging ? hit(point(event), uid)?.uid : null;
     if (to && to !== uid) dropHandler?.(uid, to);
     else if (!pointer.dragging && !pointer.long) { const slime = slimes.get(uid); if (slime) slime._tank.poke = performance.now(); tapHandler?.(uid, event); }
     pointer.id = null; pointer.target = null; pointer.dragging = false; pointer.long = false;

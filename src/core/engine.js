@@ -198,13 +198,19 @@ export function placeDecoration(state, inventoryUid, position) {
   return result(true, 'decorationPlaced', { decoration });
 }
 
-export function prestige(state, { now = Date.now() } = {}) {
-  const highestTier = Object.values(state.runMaxTier).reduce((highest, tier) => Math.max(highest, tier), 0);
-  if (highestTier < CONFIG.economy.prestige.minimumTier) return result(false, 'tierTenNeeded');
+// 轉生可得的原初之泥（UI 預覽與實際結算共用同一公式）
+export function previewPrestigeMud(state) {
   const tierSum = Object.values(state.runMaxTier).reduce((total, tier) => total + tier, 0);
   const completion = Math.min(1, state.codex.entries.length / CONFIG.economy.codex.totalEntries);
   const mudMultiplier = 1 + upgradeValue(state, 'mud_memory', 'mudGain') + topThreeBonus(state, 'core', 'prestigeMudRate');
   const mud = Math.max(CONFIG.economy.prestige.minimumMud, Math.floor(tierSum * completion * CONFIG.economy.prestige.mudBaseMultiplier * mudMultiplier));
+  return { mud, tierSum, completion };
+}
+
+export function prestige(state, { now = Date.now() } = {}) {
+  const highestTier = Object.values(state.runMaxTier).reduce((highest, tier) => Math.max(highest, tier), 0);
+  if (highestTier < CONFIG.economy.prestige.minimumTier) return result(false, 'tierTenNeeded');
+  const { mud, tierSum, completion } = previewPrestigeMud(state);
 
   state.resources.primordialMud += mud;
   state.resources.gel = 0;
