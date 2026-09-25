@@ -54,7 +54,7 @@ export function createTank(canvas, opts = {}) {
     if (!slime._tank) {
       const angle = index * 2.399;
       const radius = 70 + (index % 5) * 40;
-      slime._tank = { x: W * .5 + Math.cos(angle) * radius, y: H * .72 + Math.sin(angle) * radius * .35, vx: 0, vy: 0, seed: Math.random() * TAU, born: now, poke: 0, press: 0, stick: 0 };
+      slime._tank = { x: W * .5 + Math.cos(angle) * radius, y: H * .84 + Math.sin(angle) * radius * .08, vx: 0, vy: 0, seed: Math.random() * TAU, born: now, poke: 0, press: 0, stick: 0 };
     }
     return slime._tank;
   }
@@ -183,7 +183,8 @@ export function createTank(canvas, opts = {}) {
       state.vx *= .992; state.vy *= .992;
       state.x += state.vx * dt * 60; state.y += state.vy * dt * 60;
       if (state.x < 65 || state.x > W - 65) state.vx += (state.x < 65 ? 1 : -1) * .09;
-      if (state.y < 280 || state.y > 445) state.vy += (state.y < 280 ? 1 : -1) * .07;
+      // 活動範圍限制在地面帶（地面從 y=430 開始），不讓史萊姆飄在天空
+      if (state.y < 450 || state.y > 500) state.vy += (state.y < 450 ? 1 : -1) * .07;
     }
     if (pointer.dragging && pointer.id === slime.uid) { state.x = pointer.x; state.y = pointer.y; }
     const breath = Math.sin(now / 430 + state.seed) * .035;
@@ -300,8 +301,8 @@ export function createTank(canvas, opts = {}) {
         ctx.restore();
       }
     }
-    if (live.length <= 40) live.forEach((slime, i) => drawSlime(slime, now, night, dt));
-    else live.slice(0, 40).forEach((slime, i) => drawSlime(slime, now, night, dt));
+    // 依 y 排序繪製，前景（較下方）的史萊姆蓋在後方之上
+    live.sort((a, b) => a._tank.y - b._tank.y).forEach((slime) => drawSlime(slime, now, night, dt));
     if (merge) {
       const progress = Math.min(1, (now - merge.start) / 800);
       if (progress >= 1) { merge.resolve(); merge = null; }
