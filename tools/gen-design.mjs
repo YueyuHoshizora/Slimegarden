@@ -76,7 +76,8 @@ ${mutationRows}
 
 ## 圖鑑、資源與轉生
 
-- 圖鑑完整條目數 ${CONFIG.economy.codex.totalEntries}；每解鎖一格，永久黏液產速 +${percent(CONFIG.economy.codex.gelRatePerEntry)}。${Object.entries(CONFIG.economy.codex.giftMilestones).map(([count, gift]) => `${count} 格贈星塵 ${gift.stardust}`).join('；')}。
+- 轉生圖鑑完成度的計算分母目前為 ${CONFIG.economy.codex.totalEntries}，完成度上限為 100%；此設定不是實際可收集條目總數。依現行資料，物種、階級里程碑、各維度變異與配方合計可收集 ${SPECIES.length * (1 + CONFIG.economy.codex.tierMilestones.length + Object.values(MUTATIONS).reduce((sum, dimension) => sum + dimension.levels.length, 0)) + RECIPES.length} 條。是否調整分母仍待決定，本文件不變更遊戲數值。
+- 每解鎖一格，永久黏液產速 +${percent(CONFIG.economy.codex.gelRatePerEntry)}。${Object.entries(CONFIG.economy.codex.giftMilestones).map(([count, gift]) => `${count} 格贈星塵 ${gift.stardust}`).join('；')}。
 - 離線收益上限 ${CONFIG.time.offlineCapHours} 小時，永久升級最多提高至 ${CONFIG.time.maxOfflineCapHours} 小時；露珠核心可額外增加 ${CONFIG.time.glossOfflineCapBonusMinutes} 分鐘。
 - 轉生需任一物種達 ${CONFIG.economy.prestige.minimumTier} 階；原初之泥 = 各物種本輪最高階級總和 × 圖鑑完成度 × 永久加成，至少 ${CONFIG.economy.prestige.minimumMud}。
 - 六項永久升級：
