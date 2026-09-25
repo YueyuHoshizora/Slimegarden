@@ -1,3 +1,4 @@
+import { CONFIG } from '../data/config.js';
 const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
 // 白天 16 首、夜晚 8 首；day1、day2、night1 為手寫，其餘由 tools/gen-bgm.mjs 產生
 const TRACKS = {
@@ -182,7 +183,7 @@ function stop() {
 }
 
 function masterGain() {
-  return muted ? 0 : 0.55 * volume;
+  return muted ? 0 : CONFIG.audio.bgmMasterGain * volume;
 }
 
 function applyGain() {
