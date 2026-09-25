@@ -33,7 +33,8 @@ export function isIosInstallHint() {
 export function registerServiceWorker() {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return Promise.resolve(null);
   if (!registrationPromise) {
-    registrationPromise = navigator.serviceWorker.register('./sw.js').catch(() => null);
+    // updateViaCache: 'none' 讓 sw.js 與 importScripts 的 sw-assets.js 都略過 HTTP 快取檢查更新
+    registrationPromise = navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => null);
   }
   return registrationPromise;
 }

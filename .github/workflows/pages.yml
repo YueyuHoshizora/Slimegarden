@@ -25,9 +25,9 @@ jobs:
         with:
           node-version: 26
       - name: Run tests
-        run: node --test tests/
-      - name: Generate service worker asset manifest
-        run: node tools/build-sw-manifest.mjs
+        run: node --test 'tests/**/*.test.js'
+      - name: Hash assets and generate service worker manifest
+        run: node tools/build-assets.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
