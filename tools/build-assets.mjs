@@ -3,10 +3,11 @@
 // 同時產生 Service Worker 預快取清單 sw-assets.js（使用相同的雜湊網址）。
 import { createHash } from 'node:crypto';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { extname, join, relative, sep } from 'node:path';
+import { extname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+// 可指定部署目錄；未指定時維持更新原始專案的既有行為。
+const root = process.argv[2] ? resolve(process.argv[2]) : fileURLToPath(new URL('../', import.meta.url));
 const runtimeRoots = ['src', 'styles', 'assets'];
 const rootRuntimeFiles = ['manifest.webmanifest', 'favicon.ico'];
 const runtimeExtensions = new Set(['.html', '.css', '.js', '.json', '.svg', '.png', '.ico', '.webmanifest', '.mp3', '.ogg', '.wav']);

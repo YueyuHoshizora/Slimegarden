@@ -304,6 +304,7 @@
 | 項目 | 選型 |
 |---|---|
 | 架構 | 純前端：HTML / CSS / JavaScript（ES modules），無框架、無 CDN |
+| 部署壓縮 | esbuild 僅作建置相依；保留原始碼，所有部署用 JS／CSS（含 SW）壓縮至 `dist/`，依壓縮內容產生雜湊與快取清單；Pages 僅發布 `dist/` |
 | 繪製 | Canvas 2D（blob 向量變形、晝夜光影） |
 | 音效 | Web Audio API 即時合成 |
 | 存檔 | localStorage ＋ 檔案／Base64 匯出入 |

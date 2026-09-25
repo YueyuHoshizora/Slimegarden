@@ -60,7 +60,7 @@ Discover 62 species, 36 recipes, and mutations; decorate your garden and export 
 
 ## 本機執行
 
-不需要安裝 npm 套件，也不需要編譯或打包。於專案根目錄執行：
+直接執行原始碼不需要安裝 npm 套件，也不需要編譯或打包。於專案根目錄執行：
 
 ```sh
 python3 -m http.server 8000
@@ -89,9 +89,23 @@ node tools/build-assets.mjs
 ```
 
 - 修改 `src/data/` 後，重新產生 `DESIGN.md` 並執行節奏模擬；不要手動修改生成的數值文件。
-- 修改執行期資源後，交付前必須執行 `build-assets.mjs`。此工具會更新 `index.html` 的資產引用與 import map，以及 `sw-assets.js`。
-- 本機啟動不需要建置，但部署時必須包含更新後的資產引用與快取清單。
+- 修改執行期資源後，交付前必須更新資產雜湊與快取清單。`build-assets.mjs` 更新原始碼版本的 `index.html` 與 `sw-assets.js`；正式部署請使用下方的壓縮流程。
+- 原始碼保留可讀格式；esbuild 僅作為建置相依，不會加入遊戲執行期。
 - 現行資產網址使用根路徑，靜態部署應以網站根目錄提供專案內容，而非直接置於子路徑。
+
+### 壓縮部署產物
+
+```sh
+npm ci
+npm run build
+
+# 預覽壓縮後的網站
+python3 -m http.server 8000 --directory dist
+```
+
+`npm run build` 會清空並重建 `dist/`，將所有執行期 JS／CSS 壓縮後，再產生對應內容的雜湊網址、import map 與離線快取清單。`sw.js`、`sw-assets.js` 也會壓縮；不合併 ES modules、不改寫原始碼，不部署測試、開發工具或 `node_modules/`。
+
+GitHub Pages 工作流程會安裝鎖定版本的建置工具、執行測試並建置，最後只上傳 `dist/`。此目錄為生成產物，不應放入手動維護的檔案。
 
 ## 專案結構
 

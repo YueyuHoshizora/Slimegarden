@@ -9,7 +9,7 @@
 規格衝突裁示（2026-09-25）：物種共 62（原生 1＋基礎 22＋原初系 3＋配方 36）；配方 36（明示 27＋隱藏 9），配方圖鑑 36 格；BGM 交付 24 首（日間 16、夜間 8）。
 
 ## 硬性限制
-- 純前端 HTML／CSS／ES modules；無框架、無 CDN、無 npm 相依，不需編譯或打包即可執行。交付前仍須執行資產雜湊與 SW 快取清單產生工具。
+- 純前端 HTML／CSS／ES modules；無框架、無 CDN、無執行期 npm 相依，原始碼不需編譯或打包即可執行。允許僅建置使用的 esbuild：部署前以 `npm ci && npm run build` 壓縮所有執行期 JS／CSS 至 `dist/`，再產生資產雜湊與 SW 快取清單；不得覆寫可讀原始碼。
 - 數值只放 `src/data/`；其他處不寫死數字。
 - 所有 UI 保持在視窗內，`html`／`body`／面板不得出現捲軸；斷點 ≥1024／600–1023／<600。
 - 觸控目標 ≥44×44px；合成支援拖放與點選。
@@ -42,6 +42,7 @@ tools/         模擬、DESIGN.md 產生、資產雜湊與 SW 清單
 - 平衡模擬：`node tools/sim.mjs`
 - 產生 DESIGN.md：`node tools/gen-design.mjs`
 - CSS／JS 雜湊與 SW 快取清單：`node tools/build-assets.mjs`（改寫 `index.html` 的 `<!-- assets:start/end -->` 區塊：樣式表與進入點加 `?v=<hash>`，並以 import map 讓所有模組 import 取得雜湊網址；同時產生 `sw-assets.js`）
+- 正式部署產物：`npm ci && npm run build`（重建專用生成目錄 `dist/`；Pages 僅部署此目錄，包含壓縮後的 Service Worker 與快取清單）
 
 ## 實作慣例
 - `src/core` 保持純函式、可注入 RNG／時間／storage，方便測試。
